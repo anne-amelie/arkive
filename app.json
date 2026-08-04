@@ -1,0 +1,29 @@
+{
+  "expo": {
+    "name": "Arkive",
+    "slug": "arkive",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "dark",
+    "backgroundColor": "#0e0e10",
+    "splash": {
+      "backgroundColor": "#0e0e10"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.arkive.app"
+    },
+    "android": {
+      "package": "com.arkive.app",
+      "adaptiveIcon": {
+        "backgroundColor": "#0e0e10"
+      }
+    },
+    "plugins": [
+      "expo-font"
+    ]
+  }
+}
