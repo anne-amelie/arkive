@@ -1,25 +1,38 @@
-import { useEffect, useState } from 'react'
-import { View, Text, Image, ScrollView, Pressable, StyleSheet } from 'react-native'
+import { useEffect, useMemo, useState } from 'react'
+import { View, Text, SectionList, StyleSheet } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
-import Slider from '@react-native-community/slider'
-import { Ionicons } from '@expo/vector-icons'
-import { getSeriesExtended, artworkUrl } from '../api/tvdb'
+import { getSeriesExtended, getAllSeriesEpisodes, artworkUrl } from '../api/tvdb'
 import { useLibrary } from '../store/LibraryContext'
+import DetailHero from '../components/DetailHero'
+import SeasonSection from '../components/SeasonSection'
+import EpisodeRow from '../components/EpisodeRow'
+import AddToListSheet from '../components/AddToListSheet'
 import { colors, spacing } from '../theme'
 
 export default function ShowDetailScreen({ route, navigation }) {
   const { id } = route.params
-  const { library, addToWatchlist, removeFromWatchlist, setProgress } = useLibrary()
+  const {
+    library,
+    addToWatchlist,
+    removeFromWatchlist,
+    toggleEpisodeWatched,
+    setSeasonWatched,
+    setShowEpisodeCount,
+  } = useLibrary()
   const [series, setSeries] = useState(null)
+  const [episodes, setEpisodes] = useState([])
   const [status, setStatus] = useState('loading')
+  const [listSheetOpen, setListSheetOpen] = useState(false)
+  const [expandedSeasons, setExpandedSeasons] = useState({})
 
   useEffect(() => {
     let cancelled = false
     setStatus('loading')
-    getSeriesExtended(id)
-      .then((data) => {
+    Promise.all([getSeriesExtended(id), getAllSeriesEpisodes(id)])
+      .then(([seriesData, episodesData]) => {
         if (!cancelled) {
-          setSeries(data)
+          setSeries(seriesData)
+          setEpisodes(episodesData)
           setStatus('done')
         }
       })
@@ -29,8 +42,34 @@ export default function ShowDetailScreen({ route, navigation }) {
     }
   }, [id])
 
+  const seasons = useMemo(() => {
+    const bySeason = new Map()
+    for (const ep of episodes) {
+      const num = ep.seasonNumber ?? 0
+      if (!bySeason.has(num)) bySeason.set(num, [])
+      bySeason.get(num).push(ep)
+    }
+    return [...bySeason.entries()]
+      .sort(([a], [b]) => a - b)
+      .map(([seasonNumber, eps]) => ({
+        seasonNumber,
+        episodes: eps.sort((a, b) => (a.number ?? 0) - (b.number ?? 0)),
+      }))
+  }, [episodes])
+
+  const seasonCount = seasons.filter((s) => s.seasonNumber > 0).length || seasons.length
+
   const inLibrary = Boolean(library.shows[id])
-  const progress = library.shows[id]?.progress ?? 0
+  const watchedEpisodes = library.shows[id]?.watchedEpisodes ?? {}
+
+  useEffect(() => {
+    if (inLibrary && episodes.length > 0) setShowEpisodeCount(id, episodes.length)
+  }, [inLibrary, episodes.length, id, setShowEpisodeCount])
+
+  const progress =
+    episodes.length > 0
+      ? episodes.filter((ep) => watchedEpisodes[ep.id]).length / episodes.length
+      : 0
 
   function toggleWatchlist() {
     if (inLibrary) {
@@ -40,69 +79,94 @@ export default function ShowDetailScreen({ route, navigation }) {
     }
   }
 
+  const sections = seasons.map((season) => ({
+    key: String(season.seasonNumber),
+    seasonNumber: season.seasonNumber,
+    episodes: season.episodes,
+    data: expandedSeasons[season.seasonNumber] ? season.episodes : [],
+  }))
+
   return (
     <SafeAreaView style={styles.safe} edges={['top']}>
-      <ScrollView contentContainerStyle={{ padding: spacing.md, paddingBottom: spacing.xl }}>
-        <Pressable style={styles.back} onPress={() => navigation.goBack()}>
-          <Ionicons name="arrow-back" size={18} color={colors.text} />
-          <Text style={styles.backText}>Retour</Text>
-        </Pressable>
+      {status === 'loading' && <Text style={styles.emptyMsg}>Chargement...</Text>}
+      {status === 'error' && (
+        <Text style={styles.emptyMsg}>Impossible de charger cette série depuis TheTVDB.</Text>
+      )}
 
-        {status === 'loading' && <Text style={styles.emptyMsg}>Chargement...</Text>}
-        {status === 'error' && (
-          <Text style={styles.emptyMsg}>Impossible de charger cette série depuis TheTVDB.</Text>
-        )}
-
-        {series && (
-          <>
-            {series.image && (
-              <Image source={{ uri: artworkUrl(series.image) }} style={styles.poster} />
-            )}
-            <Text style={styles.name}>{series.name}</Text>
-            {series.overview && <Text style={styles.overview}>{series.overview}</Text>}
-
-            <Pressable
-              style={[styles.cta, inLibrary ? styles.ctaSecondary : styles.ctaPrimary]}
-              onPress={toggleWatchlist}
-            >
-              <Text style={inLibrary ? styles.ctaSecondaryText : styles.ctaPrimaryText}>
-                {inLibrary ? 'Retirer de ma watchlist' : 'Ajouter à ma watchlist'}
-              </Text>
-            </Pressable>
-
-            {inLibrary && (
-              <View style={{ marginTop: spacing.md }}>
-                <Text style={styles.progressLabel}>Progression : {Math.round(progress * 100)}%</Text>
-                <Slider
-                  minimumValue={0}
-                  maximumValue={1}
-                  value={progress}
-                  onSlidingComplete={(v) => setProgress(id, v)}
-                  minimumTrackTintColor={colors.accent}
-                  maximumTrackTintColor={colors.card}
-                  thumbTintColor={colors.accent}
+      {series && (
+        <>
+          <SectionList
+            sections={sections}
+            keyExtractor={(episode) => String(episode.id)}
+            stickySectionHeadersEnabled
+            contentContainerStyle={{ paddingBottom: spacing.xl }}
+            ListHeaderComponent={
+              <>
+                <DetailHero
+                  image={series.image ? artworkUrl(series.image) : null}
+                  title={series.name}
+                  subtitle={
+                    seasonCount > 0 ? `${seasonCount} season${seasonCount > 1 ? 's' : ''}` : null
+                  }
+                  progress={inLibrary ? progress : null}
+                  inLibrary={inLibrary}
+                  onBack={() => navigation.goBack()}
+                  onToggleFavorite={toggleWatchlist}
+                  onAddToList={() => setListSheetOpen(true)}
                 />
-              </View>
+                {series.overview && (
+                  <View style={{ paddingHorizontal: spacing.md, paddingTop: spacing.md }}>
+                    <Text style={styles.sectionTitle}>Synopsis</Text>
+                    <Text style={styles.overview}>{series.overview}</Text>
+                  </View>
+                )}
+              </>
+            }
+            renderSectionHeader={({ section }) => (
+              <SeasonSection
+                seasonNumber={section.seasonNumber}
+                episodeCount={section.episodes.length}
+                watchedCount={section.episodes.filter((ep) => watchedEpisodes[ep.id]).length}
+                expanded={Boolean(expandedSeasons[section.seasonNumber])}
+                onToggleExpand={() =>
+                  setExpandedSeasons((prev) => ({
+                    ...prev,
+                    [section.seasonNumber]: !prev[section.seasonNumber],
+                  }))
+                }
+                onToggleSeason={(watched) =>
+                  setSeasonWatched(
+                    id,
+                    section.episodes.map((ep) => ep.id),
+                    watched
+                  )
+                }
+              />
             )}
-          </>
-        )}
-      </ScrollView>
+            renderItem={({ item }) => (
+              <EpisodeRow
+                episode={item}
+                watched={Boolean(watchedEpisodes[item.id])}
+                onToggle={() => toggleEpisodeWatched(id, item.id)}
+              />
+            )}
+          />
+
+          <AddToListSheet
+            visible={listSheetOpen}
+            onClose={() => setListSheetOpen(false)}
+            id={id}
+            type="show"
+          />
+        </>
+      )}
     </SafeAreaView>
   )
 }
 
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.bg },
-  back: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: spacing.md },
-  backText: { color: colors.text, fontSize: 15 },
   emptyMsg: { color: colors.textDim, textAlign: 'center', padding: 40, fontSize: 14 },
-  poster: { width: '100%', aspectRatio: 16 / 9, borderRadius: 12, marginBottom: spacing.md },
-  name: { color: colors.text, fontSize: 22, fontWeight: '700', marginBottom: 8 },
-  overview: { color: colors.textDim, fontSize: 15, lineHeight: 22 },
-  cta: { marginTop: spacing.md, borderRadius: 10, paddingVertical: 14, alignItems: 'center' },
-  ctaPrimary: { backgroundColor: colors.accent },
-  ctaPrimaryText: { color: '#1a1a10', fontWeight: '700', fontSize: 15 },
-  ctaSecondary: { backgroundColor: colors.card },
-  ctaSecondaryText: { color: colors.text, fontWeight: '700', fontSize: 15 },
-  progressLabel: { color: colors.textDim, fontSize: 13, marginBottom: 4 },
+  sectionTitle: { color: colors.text, fontSize: 15, fontWeight: '600', marginBottom: 8 },
+  overview: { color: colors.textDim, fontSize: 14, lineHeight: 21 },
 })

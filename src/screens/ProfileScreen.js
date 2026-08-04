@@ -11,7 +11,9 @@ export default function ProfileScreen() {
 
   const stats = useMemo(() => {
     const shows = Object.values(library.shows)
-    const showsWatching = shows.filter((s) => s.progress > 0 && s.progress < 1).length
+    const showsWatching = shows.filter(
+      (s) => Object.keys(s.watchedEpisodes || {}).length > 0
+    ).length
     return { totalShows: shows.length, showsWatching }
   }, [library])
 

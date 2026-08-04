@@ -8,6 +8,7 @@ export const colors = {
   accent: '#d9cf4c',
   accentDim: '#8a8330',
   border: '#232326',
+  overlay: 'rgba(0,0,0,0.4)',
 }
 
 export const spacing = {

@@ -2,11 +2,12 @@ import { useEffect, useRef, useState } from 'react'
 import { View, Text, TextInput, FlatList, Pressable, StyleSheet } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { Ionicons } from '@expo/vector-icons'
-import { searchSeries, artworkUrl } from '../api/tvdb'
+import { searchSeries, searchMovies, artworkUrl } from '../api/tvdb'
 import ShowCard from '../components/ShowCard'
 import { colors, spacing } from '../theme'
 
 export default function ExploreScreen({ navigation }) {
+  const [mediaType, setMediaType] = useState('series') // series | movie
   const [query, setQuery] = useState('')
   const [results, setResults] = useState([])
   const [status, setStatus] = useState('idle') // idle | loading | error | done
@@ -24,7 +25,8 @@ export default function ExploreScreen({ navigation }) {
     setStatus('loading')
     debounceRef.current = setTimeout(async () => {
       try {
-        const data = await searchSeries(query)
+        const search = mediaType === 'series' ? searchSeries : searchMovies
+        const data = await search(query)
         setResults(
           (data || []).map((item) => ({
             id: item.tvdb_id || item.id,
@@ -40,21 +42,32 @@ export default function ExploreScreen({ navigation }) {
     }, 400)
 
     return () => clearTimeout(debounceRef.current)
-  }, [query])
+  }, [query, mediaType])
+
+  const goToItem = (item) =>
+    navigation.navigate(mediaType === 'series' ? 'ShowDetail' : 'MovieDetail', { id: item.id })
 
   return (
     <SafeAreaView style={styles.safe} edges={['top']}>
       <Text style={styles.title}>Explore</Text>
+
+      <View style={styles.tabs}>
+        <Pressable onPress={() => setMediaType('series')}>
+          <Text style={[styles.tab, mediaType === 'series' && styles.tabActive]}>Séries</Text>
+        </Pressable>
+        <Pressable onPress={() => setMediaType('movie')}>
+          <Text style={[styles.tab, mediaType === 'movie' && styles.tabActive]}>Films</Text>
+        </Pressable>
+      </View>
 
       <View style={styles.searchBar}>
         <Ionicons name="search" size={18} color={colors.textDim} />
         <TextInput
           value={query}
           onChangeText={setQuery}
-          placeholder="Rechercher une série..."
+          placeholder={mediaType === 'series' ? 'Rechercher une série...' : 'Rechercher un film...'}
           placeholderTextColor={colors.textDim}
           style={styles.searchInput}
-          autoFocus
         />
         {query.length > 0 && (
           <Pressable onPress={() => setQuery('')}>
@@ -80,11 +93,7 @@ export default function ExploreScreen({ navigation }) {
         columnWrapperStyle={{ gap: 10 }}
         contentContainerStyle={{ gap: 10, padding: spacing.md }}
         renderItem={({ item }) => (
-          <ShowCard
-            show={item}
-            showProgress={false}
-            onPress={() => navigation.navigate('ShowDetail', { id: item.id })}
-          />
+          <ShowCard show={item} showProgress={false} onPress={() => goToItem(item)} />
         )}
       />
     </SafeAreaView>
@@ -99,6 +108,19 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     textAlign: 'center',
     paddingVertical: spacing.md,
+  },
+  tabs: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: 32,
+    paddingBottom: spacing.sm,
+  },
+  tab: { color: colors.textDim, fontSize: 15, paddingBottom: 6 },
+  tabActive: {
+    color: colors.text,
+    fontWeight: '600',
+    borderBottomWidth: 2,
+    borderBottomColor: colors.text,
   },
   searchBar: {
     flexDirection: 'row',

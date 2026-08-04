@@ -8,6 +8,7 @@ import MyListsScreen from '../screens/MyListsScreen'
 import ExploreScreen from '../screens/ExploreScreen'
 import ProfileScreen from '../screens/ProfileScreen'
 import ShowDetailScreen from '../screens/ShowDetailScreen'
+import MovieDetailScreen from '../screens/MovieDetailScreen'
 import { colors } from '../theme'
 
 const Tab = createBottomTabNavigator()
@@ -56,6 +57,11 @@ export default function RootNavigator() {
       <Stack.Screen
         name="ShowDetail"
         component={ShowDetailScreen}
+        options={{ presentation: 'card' }}
+      />
+      <Stack.Screen
+        name="MovieDetail"
+        component={MovieDetailScreen}
         options={{ presentation: 'card' }}
       />
     </Stack.Navigator>

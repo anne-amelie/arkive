@@ -7,6 +7,12 @@ import { colors, spacing } from '../theme'
 
 const STALE_DAYS = 21
 
+function withProgress(show) {
+  const watchedCount = Object.keys(show.watchedEpisodes || {}).length
+  const progress = show.totalEpisodes ? watchedCount / show.totalEpisodes : undefined
+  return { ...show, progress, watchedCount }
+}
+
 export default function ShowsScreen({ navigation }) {
   const { library } = useLibrary()
   const [tab, setTab] = useState('watchlist')
@@ -19,12 +25,13 @@ export default function ShowsScreen({ navigation }) {
     const staleWatch = []
     const notStarted = []
     for (const show of shows) {
-      if (!show.progress || show.progress <= 0) {
-        notStarted.push(show)
+      const withProg = withProgress(show)
+      if (withProg.watchedCount === 0) {
+        notStarted.push(withProg)
       } else if (show.lastWatchedAt && now - show.lastWatchedAt > STALE_DAYS * 86400000) {
-        staleWatch.push(show)
+        staleWatch.push(withProg)
       } else {
-        watchNext.push(show)
+        watchNext.push(withProg)
       }
     }
     return { watchNext, staleWatch, notStarted }

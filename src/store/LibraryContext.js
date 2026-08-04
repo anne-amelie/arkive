@@ -2,11 +2,12 @@ import { createContext, useContext, useEffect, useMemo, useState } from 'react'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 
 const LibraryContext = createContext(null)
-const STORAGE_KEY = 'arkive_library_v1'
+const STORAGE_KEY = 'arkive_library_v2'
 
 const EMPTY_STATE = {
-  shows: {}, // id -> { id, name, image, progress (0-1), status, addedAt, lastWatchedAt }
-  lists: {}, // nom de liste -> [id, id, ...]
+  shows: {}, // id -> { id, name, image, watchedEpisodes: { episodeId: true }, totalEpisodes, addedAt, lastWatchedAt }
+  movies: {}, // id -> { id, name, image, duration, watched, addedAt, watchedAt }
+  lists: {}, // nom de liste -> [{ id, type: 'show' | 'movie' }]
 }
 
 export function LibraryProvider({ children }) {
@@ -16,7 +17,7 @@ export function LibraryProvider({ children }) {
   useEffect(() => {
     AsyncStorage.getItem(STORAGE_KEY)
       .then((raw) => {
-        if (raw) setLibrary(JSON.parse(raw))
+        if (raw) setLibrary({ ...EMPTY_STATE, ...JSON.parse(raw) })
       })
       .catch((e) => console.warn('Impossible de lire la bibliothèque locale', e))
       .finally(() => setReady(true))
@@ -40,8 +41,7 @@ export function LibraryProvider({ children }) {
               id: show.id,
               name: show.name,
               image: show.image,
-              progress: prev.shows[show.id]?.progress ?? 0,
-              status: prev.shows[show.id]?.status ?? 'not_started',
+              watchedEpisodes: prev.shows[show.id]?.watchedEpisodes ?? {},
               addedAt: prev.shows[show.id]?.addedAt ?? Date.now(),
             },
           },
@@ -56,14 +56,95 @@ export function LibraryProvider({ children }) {
         })
       },
 
-      setProgress(id, progress) {
+      toggleEpisodeWatched(showId, episodeId) {
         setLibrary((prev) => {
-          if (!prev.shows[id]) return prev
+          const show = prev.shows[showId]
+          if (!show) return prev
+          const watchedEpisodes = { ...show.watchedEpisodes }
+          const nowWatched = !watchedEpisodes[episodeId]
+          if (nowWatched) {
+            watchedEpisodes[episodeId] = true
+          } else {
+            delete watchedEpisodes[episodeId]
+          }
           return {
             ...prev,
             shows: {
               ...prev.shows,
-              [id]: { ...prev.shows[id], progress, lastWatchedAt: Date.now() },
+              [showId]: { ...show, watchedEpisodes, lastWatchedAt: Date.now() },
+            },
+          }
+        })
+      },
+
+      setShowEpisodeCount(showId, totalEpisodes) {
+        setLibrary((prev) => {
+          const show = prev.shows[showId]
+          if (!show || show.totalEpisodes === totalEpisodes) return prev
+          return {
+            ...prev,
+            shows: { ...prev.shows, [showId]: { ...show, totalEpisodes } },
+          }
+        })
+      },
+
+      setSeasonWatched(showId, episodeIds, watched) {
+        setLibrary((prev) => {
+          const show = prev.shows[showId]
+          if (!show) return prev
+          const watchedEpisodes = { ...show.watchedEpisodes }
+          for (const epId of episodeIds) {
+            if (watched) {
+              watchedEpisodes[epId] = true
+            } else {
+              delete watchedEpisodes[epId]
+            }
+          }
+          return {
+            ...prev,
+            shows: {
+              ...prev.shows,
+              [showId]: { ...show, watchedEpisodes, lastWatchedAt: Date.now() },
+            },
+          }
+        })
+      },
+
+      addMovieToWatchlist(movie) {
+        setLibrary((prev) => ({
+          ...prev,
+          movies: {
+            ...prev.movies,
+            [movie.id]: {
+              id: movie.id,
+              name: movie.name,
+              image: movie.image,
+              duration: movie.duration,
+              watched: prev.movies[movie.id]?.watched ?? false,
+              addedAt: prev.movies[movie.id]?.addedAt ?? Date.now(),
+            },
+          },
+        }))
+      },
+
+      removeMovieFromWatchlist(id) {
+        setLibrary((prev) => {
+          const movies = { ...prev.movies }
+          delete movies[id]
+          return { ...prev, movies }
+        })
+      },
+
+      toggleMovieWatched(id) {
+        setLibrary((prev) => {
+          const movie = prev.movies[id]
+          if (!movie) return prev
+          const watched = !movie.watched
+          return {
+            ...prev,
+            movies: {
+              ...prev.movies,
+              [id]: { ...movie, watched, watchedAt: watched ? Date.now() : movie.watchedAt },
             },
           }
         })
@@ -76,20 +157,22 @@ export function LibraryProvider({ children }) {
         })
       },
 
-      addToList(listName, showId) {
+      addToList(listName, id, type) {
         setLibrary((prev) => {
           const current = prev.lists[listName] || []
-          if (current.includes(showId)) return prev
-          return { ...prev, lists: { ...prev.lists, [listName]: [...current, showId] } }
+          if (current.some((entry) => entry.id === id && entry.type === type)) return prev
+          return { ...prev, lists: { ...prev.lists, [listName]: [...current, { id, type }] } }
         })
       },
 
-      removeFromList(listName, showId) {
+      removeFromList(listName, id, type) {
         setLibrary((prev) => ({
           ...prev,
           lists: {
             ...prev.lists,
-            [listName]: (prev.lists[listName] || []).filter((id) => id !== showId),
+            [listName]: (prev.lists[listName] || []).filter(
+              (entry) => !(entry.id === id && entry.type === type)
+            ),
           },
         }))
       },

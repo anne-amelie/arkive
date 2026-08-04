@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { View, Text, ScrollView, TextInput, Pressable, StyleSheet } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
+import { Ionicons } from '@expo/vector-icons'
 import { useLibrary } from '../store/LibraryContext'
 import ShowCard from '../components/ShowCard'
 import { colors, spacing } from '../theme'
@@ -9,6 +10,7 @@ export default function MyListsScreen({ navigation }) {
   const { library, createList } = useLibrary()
   const [newListName, setNewListName] = useState('')
   const [showInput, setShowInput] = useState(false)
+  const [openList, setOpenList] = useState(null)
 
   const listNames = Object.keys(library.lists)
 
@@ -32,26 +34,58 @@ export default function MyListsScreen({ navigation }) {
         )}
 
         {listNames.map((name) => {
-          const ids = library.lists[name]
-          const shows = ids.map((id) => library.shows[id]).filter(Boolean)
+          const entries = library.lists[name]
+          const items = entries
+            .map((entry) => {
+              const source = entry.type === 'movie' ? library.movies : library.shows
+              const item = source[entry.id]
+              if (!item) return null
+              const progress =
+                entry.type === 'movie'
+                  ? item.watched
+                    ? 1
+                    : 0
+                  : item.totalEpisodes
+                    ? Object.keys(item.watchedEpisodes || {}).length / item.totalEpisodes
+                    : undefined
+              return { ...item, type: entry.type, progress }
+            })
+            .filter(Boolean)
+          const isOpen = openList === name
           return (
             <View key={name}>
-              <Text style={styles.sectionTitle}>{name}</Text>
-              {shows.length === 0 ? (
-                <View style={styles.emptyBox}>
-                  <Text style={styles.emptyBoxText}>There's nothing in this list yet</Text>
-                </View>
-              ) : (
-                <View style={styles.grid}>
-                  {shows.map((show) => (
-                    <ShowCard
-                      key={show.id}
-                      show={show}
-                      onPress={() => navigation.navigate('ShowDetail', { id: show.id })}
-                    />
-                  ))}
-                </View>
-              )}
+              <Pressable
+                style={styles.sectionHeader}
+                onPress={() => setOpenList(isOpen ? null : name)}
+              >
+                <Text style={styles.sectionTitle}>{name}</Text>
+                <Ionicons
+                  name={isOpen ? 'chevron-up' : 'chevron-down'}
+                  size={16}
+                  color={colors.textDim}
+                />
+              </Pressable>
+              {isOpen &&
+                (items.length === 0 ? (
+                  <View style={styles.emptyBox}>
+                    <Text style={styles.emptyBoxText}>There's nothing in this list yet</Text>
+                  </View>
+                ) : (
+                  <View style={styles.grid}>
+                    {items.map((item) => (
+                      <ShowCard
+                        key={`${item.type}-${item.id}`}
+                        show={item}
+                        onPress={() =>
+                          navigation.navigate(
+                            item.type === 'movie' ? 'MovieDetail' : 'ShowDetail',
+                            { id: item.id }
+                          )
+                        }
+                      />
+                    ))}
+                  </View>
+                ))}
             </View>
           )
         })}
@@ -87,14 +121,15 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.md,
   },
   emptyMsg: { color: colors.textDim, textAlign: 'center', padding: 40, fontSize: 14 },
-  sectionTitle: {
-    color: colors.text,
-    fontSize: 15,
-    fontWeight: '600',
+  sectionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
     paddingHorizontal: spacing.md,
     paddingTop: spacing.md,
     paddingBottom: 10,
   },
+  sectionTitle: { color: colors.text, fontSize: 15, fontWeight: '600' },
   emptyBox: {
     marginHorizontal: spacing.md,
     padding: 40,
