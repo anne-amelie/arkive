@@ -1,6 +1,7 @@
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
 import { createNativeStackNavigator } from '@react-navigation/native-stack'
 import { Ionicons } from '@expo/vector-icons'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import ShowsScreen from '../screens/ShowsScreen'
 import MoviesScreen from '../screens/MoviesScreen'
@@ -9,7 +10,7 @@ import ExploreScreen from '../screens/ExploreScreen'
 import ProfileScreen from '../screens/ProfileScreen'
 import ShowDetailScreen from '../screens/ShowDetailScreen'
 import MovieDetailScreen from '../screens/MovieDetailScreen'
-import { colors } from '../theme'
+import { colors, spacing, radius } from '../theme'
 
 const Tab = createBottomTabNavigator()
 const Stack = createNativeStackNavigator()
@@ -23,22 +24,36 @@ const ICONS = {
 }
 
 function Tabs() {
+  const insets = useSafeAreaInsets()
+
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
         headerShown: false,
-        tabBarActiveTintColor: colors.text,
+        tabBarActiveTintColor: colors.accent,
         tabBarInactiveTintColor: colors.textDim,
         tabBarStyle: {
-          backgroundColor: '#050506',
-          borderTopColor: colors.border,
-          height: 76,
-          paddingBottom: 10,
-          paddingTop: 6,
+          position: 'absolute',
+          left: spacing.lg,
+          right: spacing.lg,
+          bottom: insets.bottom + spacing.md,
+          height: 72,
+          borderRadius: radius.pill,
+          borderTopWidth: 0,
+          backgroundColor: colors.card,
+          borderWidth: 1,
+          borderColor: 'rgba(255,255,255,0.08)',
+          paddingBottom: 0,
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: 10 },
+          shadowOpacity: 0.45,
+          shadowRadius: 16,
+          elevation: 12,
         },
-        tabBarIcon: ({ color, size }) => (
-          <Ionicons name={ICONS[route.name]} color={color} size={size - 2} />
-        ),
+        tabBarItemStyle: { justifyContent: 'center' },
+        tabBarIconStyle: { flex: 0, height: 34, marginBottom: 2 },
+        tabBarLabelStyle: { fontSize: 10, fontWeight: '600' },
+        tabBarIcon: ({ color }) => <Ionicons name={ICONS[route.name]} color={color} size={22} />,
       })}
     >
       <Tab.Screen name="Shows" component={ShowsScreen} />

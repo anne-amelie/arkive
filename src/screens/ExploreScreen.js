@@ -5,7 +5,7 @@ import { Ionicons } from '@expo/vector-icons'
 import { searchSeries, searchMovies, artworkUrl } from '../api/tmdb'
 import ShowCard from '../components/ShowCard'
 import CardGrid from '../components/CardGrid'
-import { colors, spacing } from '../theme'
+import { colors, spacing, tabBarClearance } from '../theme'
 
 export default function ExploreScreen({ navigation }) {
   const [mediaType, setMediaType] = useState('series') // series | movie
@@ -81,7 +81,7 @@ export default function ExploreScreen({ navigation }) {
         <Text style={styles.emptyMsg}>No results for "{query}".</Text>
       )}
 
-      <ScrollView contentContainerStyle={{ paddingBottom: spacing.xl }}>
+      <ScrollView contentContainerStyle={{ paddingBottom: tabBarClearance }}>
         <CardGrid
           items={results}
           style={{ paddingTop: spacing.sm }}

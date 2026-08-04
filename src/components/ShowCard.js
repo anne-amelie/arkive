@@ -45,17 +45,14 @@ const styles = StyleSheet.create({
   },
   progressTrack: {
     position: 'absolute',
-    left: 8,
-    right: 8,
-    bottom: 8,
-    height: 6,
-    borderRadius: 3,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    height: 9,
     backgroundColor: 'rgba(255,255,255,0.15)',
-    overflow: 'hidden',
   },
   progressFill: {
     height: '100%',
     backgroundColor: colors.accent,
-    borderRadius: 3,
   },
 })

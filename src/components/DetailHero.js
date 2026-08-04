@@ -1,30 +1,41 @@
 import { View, Text, Image, Pressable, StyleSheet } from 'react-native'
 import { LinearGradient } from 'expo-linear-gradient'
 import { Ionicons } from '@expo/vector-icons'
-import { colors, spacing } from '../theme'
+import { colors, spacing, radius, shadow } from '../theme'
 
 export default function DetailHero({
-  image,
+  backdrop,
+  poster,
   title,
   subtitle,
+  year,
+  rating,
+  genres,
   progress,
   inLibrary,
   onBack,
   onToggleFavorite,
   onAddToList,
 }) {
+  const backdropSource = backdrop || poster
+
   return (
     <View>
-      <View style={styles.imageWrap}>
-        {image ? (
-          <Image source={{ uri: image }} style={styles.image} resizeMode="cover" />
+      <View style={styles.backdropWrap}>
+        {backdropSource ? (
+          <Image source={{ uri: backdropSource }} style={styles.backdrop} resizeMode="cover" />
         ) : (
-          <View style={[styles.image, styles.imageFallback]} />
+          <View style={[styles.backdrop, styles.backdropFallback]} />
         )}
 
         <LinearGradient
-          colors={['transparent', 'rgba(0,0,0,0.75)']}
-          style={styles.scrim}
+          colors={['rgba(0,0,0,0.55)', 'transparent']}
+          style={styles.topScrim}
+          pointerEvents="none"
+        />
+        <LinearGradient
+          colors={['transparent', colors.bg]}
+          style={styles.bottomScrim}
           pointerEvents="none"
         />
 
@@ -45,38 +56,80 @@ export default function DetailHero({
             </Pressable>
           </View>
         </View>
+      </View>
 
-        <View style={styles.titleWrap}>
+      <View style={styles.contentRow}>
+        <View style={styles.posterWrap}>
+          {poster ? (
+            <Image source={{ uri: poster }} style={styles.poster} resizeMode="cover" />
+          ) : (
+            <View style={[styles.poster, styles.posterFallback]} />
+          )}
+        </View>
+
+        <View style={styles.infoCol}>
           <Text style={styles.title} numberOfLines={2}>
             {title}
           </Text>
-          {subtitle ? <Text style={styles.subtitle}>{subtitle}</Text> : null}
+
+          <View style={styles.metaRow}>
+            {typeof rating === 'number' && rating > 0 && (
+              <View style={styles.ratingBadge}>
+                <Ionicons name="star" size={12} color={colors.accent} />
+                <Text style={styles.ratingText}>{rating.toFixed(1)}</Text>
+              </View>
+            )}
+            {year && <Text style={styles.metaText}>{year}</Text>}
+            {subtitle && <Text style={styles.metaText}>{subtitle}</Text>}
+          </View>
+
+          {genres?.length > 0 && (
+            <View style={styles.genreRow}>
+              {genres.slice(0, 3).map((genre) => (
+                <View key={genre} style={styles.chip}>
+                  <Text style={styles.chipText}>{genre}</Text>
+                </View>
+              ))}
+            </View>
+          )}
         </View>
       </View>
 
       {typeof progress === 'number' && (
-        <View style={styles.progressTrack}>
-          <View style={[styles.progressFill, { width: `${Math.round(progress * 100)}%` }]} />
+        <View style={styles.progressSection}>
+          <Text style={styles.progressLabel}>{Math.round(progress * 100)}% watched</Text>
+          <View style={styles.progressTrack}>
+            <View style={[styles.progressFill, { width: `${Math.round(progress * 100)}%` }]} />
+          </View>
         </View>
       )}
     </View>
   )
 }
 
+const POSTER_WIDTH = 92
+
 const styles = StyleSheet.create({
-  imageWrap: {
+  backdropWrap: {
     width: '100%',
-    aspectRatio: 2.35,
+    aspectRatio: 16 / 9,
     backgroundColor: colors.card,
   },
-  image: { width: '100%', height: '100%' },
-  imageFallback: { backgroundColor: colors.card },
-  scrim: {
+  backdrop: { width: '100%', height: '100%' },
+  backdropFallback: { backgroundColor: colors.card },
+  topScrim: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    top: 0,
+    height: '40%',
+  },
+  bottomScrim: {
     position: 'absolute',
     left: 0,
     right: 0,
     bottom: 0,
-    height: '65%',
+    height: '55%',
   },
   topRow: {
     position: 'absolute',
@@ -90,25 +143,79 @@ const styles = StyleSheet.create({
   iconBtn: {
     width: 36,
     height: 36,
-    borderRadius: 18,
+    borderRadius: radius.pill,
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: colors.overlay,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.12)',
   },
-  titleWrap: {
-    position: 'absolute',
-    left: spacing.md,
-    right: spacing.md,
-    bottom: spacing.sm,
+  contentRow: {
+    flexDirection: 'row',
+    paddingHorizontal: spacing.md,
+    marginTop: -48,
+    gap: spacing.md,
   },
-  title: { color: colors.text, fontSize: 22, fontWeight: '700' },
-  subtitle: { color: colors.text, fontSize: 13, opacity: 0.85, marginTop: 2 },
+  posterWrap: {
+    width: POSTER_WIDTH,
+    aspectRatio: 2 / 3,
+    borderRadius: radius.md,
+    borderWidth: 3,
+    borderColor: colors.bg,
+    overflow: 'hidden',
+    backgroundColor: colors.card,
+    ...shadow,
+  },
+  poster: { width: '100%', height: '100%' },
+  posterFallback: { backgroundColor: colors.cardEmpty },
+  infoCol: {
+    flex: 1,
+    justifyContent: 'flex-end',
+    paddingBottom: spacing.xs,
+  },
+  title: { color: colors.text, fontSize: 21, fontWeight: '700', lineHeight: 26 },
+  metaRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flexWrap: 'wrap',
+    gap: 8,
+    marginTop: 6,
+  },
+  ratingBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: colors.accentSoft,
+    paddingHorizontal: 7,
+    paddingVertical: 3,
+    borderRadius: radius.sm,
+  },
+  ratingText: { color: colors.accent, fontSize: 12, fontWeight: '700' },
+  metaText: { color: colors.textDim, fontSize: 13 },
+  genreRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginTop: 8 },
+  chip: {
+    backgroundColor: colors.chip,
+    paddingHorizontal: 9,
+    paddingVertical: 4,
+    borderRadius: radius.pill,
+  },
+  chipText: { color: colors.textDim, fontSize: 11, fontWeight: '600' },
+  progressSection: {
+    paddingHorizontal: spacing.md,
+    marginTop: spacing.md,
+    gap: 6,
+  },
   progressTrack: {
-    height: 4,
+    height: 6,
+    borderRadius: radius.pill,
     backgroundColor: colors.accentDim,
+    overflow: 'hidden',
   },
-  progressFill: {
-    height: '100%',
-    backgroundColor: colors.accent,
+  progressFill: { height: '100%', backgroundColor: colors.accent, borderRadius: radius.pill },
+  progressLabel: {
+    color: colors.textDim,
+    fontSize: 12,
+    fontWeight: '600',
+    textAlign: 'right',
   },
 })

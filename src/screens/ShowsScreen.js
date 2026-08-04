@@ -3,7 +3,7 @@ import { View, Text, ScrollView, Pressable, StyleSheet } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { useLibrary } from '../store/LibraryContext'
 import Shelf from '../components/Shelf'
-import { colors, spacing } from '../theme'
+import { colors, spacing, tabBarClearance } from '../theme'
 
 const STALE_DAYS = 21
 
@@ -52,7 +52,7 @@ export default function ShowsScreen({ navigation }) {
         </Pressable>
       </View>
 
-      <ScrollView contentContainerStyle={{ paddingBottom: spacing.xl }}>
+      <ScrollView contentContainerStyle={{ paddingBottom: tabBarClearance }}>
         {tab === 'watchlist' ? (
           shows.length === 0 ? (
             <Text style={styles.emptyMsg}>

@@ -4,7 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 import { useLibrary } from '../store/LibraryContext'
 import ShowCard from '../components/ShowCard'
 import CardGrid from '../components/CardGrid'
-import { colors, spacing } from '../theme'
+import { colors, spacing, tabBarClearance } from '../theme'
 
 export default function MoviesScreen({ navigation }) {
   const { library } = useLibrary()
@@ -37,7 +37,7 @@ export default function MoviesScreen({ navigation }) {
         </Pressable>
       </View>
 
-      <ScrollView contentContainerStyle={{ paddingBottom: spacing.xl }}>
+      <ScrollView contentContainerStyle={{ paddingBottom: tabBarClearance }}>
         {movies.length === 0 ? (
           <Text style={styles.emptyMsg}>
             Your movie list is empty. Go to "Explore" (Movies tab) to add some.

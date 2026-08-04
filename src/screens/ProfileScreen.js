@@ -4,7 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 import { LinearGradient } from 'expo-linear-gradient'
 import { Ionicons } from '@expo/vector-icons'
 import { useLibrary } from '../store/LibraryContext'
-import { colors, spacing } from '../theme'
+import { colors, spacing, tabBarClearance } from '../theme'
 
 export default function ProfileScreen() {
   const { library } = useLibrary()
@@ -19,7 +19,7 @@ export default function ProfileScreen() {
 
   return (
     <SafeAreaView style={styles.safe} edges={['top']}>
-      <ScrollView contentContainerStyle={{ paddingBottom: spacing.xl }}>
+      <ScrollView contentContainerStyle={{ paddingBottom: tabBarClearance }}>
         <LinearGradient colors={['#4a3b63', '#2b2440']} style={styles.header}>
           <View style={styles.headerOverlay}>
             <View style={styles.avatar}>

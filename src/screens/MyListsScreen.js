@@ -5,7 +5,7 @@ import { Ionicons } from '@expo/vector-icons'
 import { useLibrary } from '../store/LibraryContext'
 import ShowCard from '../components/ShowCard'
 import CardGrid from '../components/CardGrid'
-import { colors, spacing } from '../theme'
+import { colors, spacing, tabBarClearance } from '../theme'
 
 export default function MyListsScreen({ navigation }) {
   const { library, createList } = useLibrary()
@@ -26,7 +26,7 @@ export default function MyListsScreen({ navigation }) {
     <SafeAreaView style={styles.safe} edges={['top']}>
       <Text style={styles.title}>My lists</Text>
 
-      <ScrollView contentContainerStyle={{ paddingBottom: spacing.xl }}>
+      <ScrollView contentContainerStyle={{ paddingBottom: tabBarClearance }}>
         {listNames.length === 0 && (
           <Text style={styles.emptyMsg}>
             You don't have any lists yet. Create one to organize your shows (e.g. "To rewatch",
