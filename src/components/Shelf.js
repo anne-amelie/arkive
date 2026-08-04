@@ -12,7 +12,7 @@ export default function Shelf({ title, shows, onSelect }) {
         {shows.map((show) => (
           <ShowCard key={show.id} show={show} onPress={() => onSelect?.(show)} />
         ))}
-        {/* Complète la rangée pour garder des cartes bien alignées si < 3 items */}
+        {/* Fill the row to keep cards aligned when there are fewer than 3 items */}
         {shows.length < 3 &&
           Array.from({ length: 3 - shows.length }).map((_, i) => (
             <View key={`filler-${i}`} style={{ flex: 1 }} />

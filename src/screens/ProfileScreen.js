@@ -37,11 +37,11 @@ export default function ProfileScreen() {
         <View style={styles.statsStack}>
           <View style={styles.statCard}>
             <Text style={styles.statValue}>{stats.totalShows}</Text>
-            <Text style={styles.statLabel}>SÉRIES DANS TA BIBLIOTHÈQUE</Text>
+            <Text style={styles.statLabel}>SHOWS IN YOUR LIBRARY</Text>
           </View>
           <View style={styles.statCard}>
             <Text style={styles.statValue}>{stats.showsWatching}</Text>
-            <Text style={styles.statLabel}>EN COURS DE VISIONNAGE</Text>
+            <Text style={styles.statLabel}>CURRENTLY WATCHING</Text>
           </View>
         </View>
       </ScrollView>

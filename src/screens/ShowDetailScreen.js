@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { View, Text, SectionList, StyleSheet } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { getSeriesExtended, getAllSeriesEpisodes, artworkUrl } from '../api/tmdb'
@@ -23,7 +23,8 @@ export default function ShowDetailScreen({ route, navigation }) {
   const [episodes, setEpisodes] = useState([])
   const [status, setStatus] = useState('loading')
   const [listSheetOpen, setListSheetOpen] = useState(false)
-  const [expandedSeasons, setExpandedSeasons] = useState({})
+  const [expandedSeason, setExpandedSeason] = useState(null)
+  const sectionListRef = useRef(null)
 
   useEffect(() => {
     let cancelled = false
@@ -38,7 +39,10 @@ export default function ShowDetailScreen({ route, navigation }) {
           setStatus('done')
         }
       })
-      .catch(() => !cancelled && setStatus('error'))
+      .catch((err) => {
+        console.error(err)
+        if (!cancelled) setStatus('error')
+      })
     return () => {
       cancelled = true
     }
@@ -77,7 +81,7 @@ export default function ShowDetailScreen({ route, navigation }) {
     if (inLibrary) {
       removeFromWatchlist(id)
     } else {
-      addToWatchlist({ id, name: series?.name || 'Série', image: artworkUrl(series?.image) })
+      addToWatchlist({ id, name: series?.name || 'Show', image: artworkUrl(series?.image) })
     }
   }
 
@@ -85,19 +89,32 @@ export default function ShowDetailScreen({ route, navigation }) {
     key: String(season.seasonNumber),
     seasonNumber: season.seasonNumber,
     episodes: season.episodes,
-    data: expandedSeasons[season.seasonNumber] ? season.episodes : [],
+    data: season.seasonNumber === expandedSeason ? season.episodes : [],
   }))
+
+  useEffect(() => {
+    if (expandedSeason === null) return
+    const sectionIndex = sections.findIndex((s) => s.seasonNumber === expandedSeason)
+    if (sectionIndex === -1 || sections[sectionIndex].episodes.length === 0) return
+    sectionListRef.current?.scrollToLocation({
+      sectionIndex,
+      itemIndex: 0,
+      viewPosition: 0,
+    })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [expandedSeason])
 
   return (
     <SafeAreaView style={styles.safe} edges={['top']}>
-      {status === 'loading' && <Text style={styles.emptyMsg}>Chargement...</Text>}
+      {status === 'loading' && <Text style={styles.emptyMsg}>Loading...</Text>}
       {status === 'error' && (
-        <Text style={styles.emptyMsg}>Impossible de charger cette série depuis TMDb.</Text>
+        <Text style={styles.emptyMsg}>Couldn't load this show from TMDb.</Text>
       )}
 
       {series && (
         <>
           <SectionList
+            ref={sectionListRef}
             sections={sections}
             keyExtractor={(episode) => String(episode.id)}
             stickySectionHeadersEnabled
@@ -129,12 +146,11 @@ export default function ShowDetailScreen({ route, navigation }) {
                 seasonNumber={section.seasonNumber}
                 episodeCount={section.episodes.length}
                 watchedCount={section.episodes.filter((ep) => watchedEpisodes[ep.id]).length}
-                expanded={Boolean(expandedSeasons[section.seasonNumber])}
+                expanded={section.seasonNumber === expandedSeason}
                 onToggleExpand={() =>
-                  setExpandedSeasons((prev) => ({
-                    ...prev,
-                    [section.seasonNumber]: !prev[section.seasonNumber],
-                  }))
+                  setExpandedSeason((prev) =>
+                    prev === section.seasonNumber ? null : section.seasonNumber
+                  )
                 }
                 onToggleSeason={(watched) =>
                   setSeasonWatched(

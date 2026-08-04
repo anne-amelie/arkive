@@ -3,6 +3,7 @@ import { View, Text, ScrollView, Pressable, StyleSheet } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { useLibrary } from '../store/LibraryContext'
 import ShowCard from '../components/ShowCard'
+import CardGrid from '../components/CardGrid'
 import { colors, spacing } from '../theme'
 
 export default function MoviesScreen({ navigation }) {
@@ -29,26 +30,28 @@ export default function MoviesScreen({ navigation }) {
 
       <View style={styles.tabs}>
         <Pressable onPress={() => setTab('toWatch')}>
-          <Text style={[styles.tab, tab === 'toWatch' && styles.tabActive]}>À voir</Text>
+          <Text style={[styles.tab, tab === 'toWatch' && styles.tabActive]}>To watch</Text>
         </Pressable>
         <Pressable onPress={() => setTab('watched')}>
-          <Text style={[styles.tab, tab === 'watched' && styles.tabActive]}>Vus</Text>
+          <Text style={[styles.tab, tab === 'watched' && styles.tabActive]}>Watched</Text>
         </Pressable>
       </View>
 
       <ScrollView contentContainerStyle={{ paddingBottom: spacing.xl }}>
         {movies.length === 0 ? (
           <Text style={styles.emptyMsg}>
-            Ta liste de films est vide. Va dans "Explore" (onglet Films) pour en ajouter.
+            Your movie list is empty. Go to "Explore" (Movies tab) to add some.
           </Text>
         ) : shown.length === 0 ? (
-          <Text style={styles.emptyMsg}>Rien ici pour l'instant.</Text>
+          <Text style={styles.emptyMsg}>Nothing here yet.</Text>
         ) : (
-          <View style={styles.grid}>
-            {shown.map((movie) => (
+          <CardGrid
+            items={shown}
+            style={{ paddingTop: spacing.md }}
+            renderItem={(movie) => (
               <ShowCard key={movie.id} show={movie} onPress={() => goToMovie(movie)} />
-            ))}
-          </View>
+            )}
+          />
         )}
       </ScrollView>
     </SafeAreaView>
@@ -80,5 +83,4 @@ const styles = StyleSheet.create({
     borderBottomColor: colors.text,
   },
   emptyMsg: { color: colors.textDim, textAlign: 'center', padding: 40, fontSize: 14 },
-  grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, paddingHorizontal: spacing.md, paddingTop: spacing.md },
 })

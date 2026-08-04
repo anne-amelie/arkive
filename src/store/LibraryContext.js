@@ -2,12 +2,16 @@ import { createContext, useContext, useEffect, useMemo, useState } from 'react'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 
 const LibraryContext = createContext(null)
-const STORAGE_KEY = 'arkive_library_v2'
+const STORAGE_KEY = 'arkive_library'
+// Bump this whenever the shape of the stored data changes in an incompatible way
+// (e.g. switching data providers, changing how progress is tracked). Any stored
+// payload with a different version is discarded instead of merged.
+const SCHEMA_VERSION = 2
 
 const EMPTY_STATE = {
   shows: {}, // id -> { id, name, image, watchedEpisodes: { episodeId: true }, totalEpisodes, addedAt, lastWatchedAt }
   movies: {}, // id -> { id, name, image, duration, watched, addedAt, watchedAt }
-  lists: {}, // nom de liste -> [{ id, type: 'show' | 'movie' }]
+  lists: {}, // list name -> [{ id, type: 'show' | 'movie' }]
 }
 
 export function LibraryProvider({ children }) {
@@ -17,14 +21,19 @@ export function LibraryProvider({ children }) {
   useEffect(() => {
     AsyncStorage.getItem(STORAGE_KEY)
       .then((raw) => {
-        if (raw) setLibrary({ ...EMPTY_STATE, ...JSON.parse(raw) })
+        const parsed = raw ? JSON.parse(raw) : null
+        if (parsed?.version === SCHEMA_VERSION) {
+          setLibrary({ ...EMPTY_STATE, ...parsed.data })
+        }
       })
-      .catch((e) => console.warn('Impossible de lire la bibliothèque locale', e))
+      .catch((e) => console.warn("Couldn't read the local library", e))
       .finally(() => setReady(true))
   }, [])
 
   useEffect(() => {
-    if (ready) AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(library))
+    if (ready) {
+      AsyncStorage.setItem(STORAGE_KEY, JSON.stringify({ version: SCHEMA_VERSION, data: library }))
+    }
   }, [library, ready])
 
   const api = useMemo(
@@ -185,6 +194,6 @@ export function LibraryProvider({ children }) {
 
 export function useLibrary() {
   const ctx = useContext(LibraryContext)
-  if (!ctx) throw new Error('useLibrary doit être utilisé sous LibraryProvider')
+  if (!ctx) throw new Error('useLibrary must be used within a LibraryProvider')
   return ctx
 }

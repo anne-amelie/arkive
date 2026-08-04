@@ -46,8 +46,9 @@ const styles = StyleSheet.create({
   wrap: {
     backgroundColor: colors.bg,
     paddingHorizontal: spacing.md,
-    paddingTop: spacing.sm,
-    paddingBottom: 6,
+        paddingTop: spacing.lg,
+    paddingBottom: spacing.sm,
+
   },
   header: {
     flexDirection: 'row',

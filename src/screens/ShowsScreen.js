@@ -56,7 +56,7 @@ export default function ShowsScreen({ navigation }) {
         {tab === 'watchlist' ? (
           shows.length === 0 ? (
             <Text style={styles.emptyMsg}>
-              Ta watchlist est vide. Va dans "Explore" pour ajouter des séries.
+              Your watchlist is empty. Go to "Explore" to add some shows.
             </Text>
           ) : (
             <>
@@ -67,8 +67,7 @@ export default function ShowsScreen({ navigation }) {
           )
         ) : (
           <Text style={styles.emptyMsg}>
-            Les prochains épisodes à venir s'afficheront ici une fois connectés aux dates de
-            diffusion TMDb.
+            Upcoming episodes will show up here once we're connected to TMDb's air dates.
           </Text>
         )}
       </ScrollView>
