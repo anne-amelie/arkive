@@ -92,6 +92,7 @@ export async function getAllSeriesEpisodes(id, seasons) {
       name: ep.name,
       image: ep.still_path,
       airDate: ep.air_date,
+      runtime: ep.runtime,
     }))
   )
 }

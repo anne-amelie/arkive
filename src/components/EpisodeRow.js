@@ -1,6 +1,6 @@
 import { View, Text, Image, Pressable, StyleSheet } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
-import { colors, spacing, radius, shadow } from '../theme'
+import { colors, spacing, radius, shadow, useAccentColors } from '../theme'
 
 function formatAirDate(dateString) {
   if (!dateString) return null
@@ -10,6 +10,7 @@ function formatAirDate(dateString) {
 }
 
 export default function EpisodeRow({ episode, watched, onToggle }) {
+  const { accent } = useAccentColors()
   const airDate = formatAirDate(episode.airDate)
 
   return (
@@ -37,7 +38,7 @@ export default function EpisodeRow({ episode, watched, onToggle }) {
       <Ionicons
         name={watched ? 'checkmark-circle' : 'checkmark-circle-outline'}
         size={24}
-        color={watched ? colors.accent : colors.textDim}
+        color={watched ? accent : colors.textDim}
       />
     </Pressable>
   )

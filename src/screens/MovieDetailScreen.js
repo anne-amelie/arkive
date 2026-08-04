@@ -6,12 +6,13 @@ import { getMovieExtended, artworkUrl, formatRuntime } from '../api/tmdb'
 import { useLibrary } from '../store/LibraryContext'
 import DetailHero from '../components/DetailHero'
 import AddToListSheet from '../components/AddToListSheet'
-import { colors, spacing, radius, shadow } from '../theme'
+import { colors, spacing, radius, shadow, useAccentColors } from '../theme'
 
 export default function MovieDetailScreen({ route, navigation }) {
   const { id } = route.params
   const { library, addMovieToWatchlist, removeMovieFromWatchlist, toggleMovieWatched } =
     useLibrary()
+  const { accent } = useAccentColors()
   const [movie, setMovie] = useState(null)
   const [status, setStatus] = useState('loading')
   const [listSheetOpen, setListSheetOpen] = useState(false)
@@ -47,7 +48,7 @@ export default function MovieDetailScreen({ route, navigation }) {
         id,
         name: movie?.name || 'Movie',
         image: artworkUrl(movie?.image),
-        duration,
+        durationMinutes: movie?.runtime,
       })
     }
   }
@@ -84,7 +85,7 @@ export default function MovieDetailScreen({ route, navigation }) {
                   <Ionicons
                     name={watched ? 'checkmark-circle' : 'checkmark-circle-outline'}
                     size={22}
-                    color={watched ? colors.accent : colors.textDim}
+                    color={watched ? accent : colors.textDim}
                   />
                 </Pressable>
               )}

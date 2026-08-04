@@ -9,9 +9,20 @@ const STORAGE_KEY = 'arkive_library'
 const SCHEMA_VERSION = 2
 
 const EMPTY_STATE = {
-  shows: {}, // id -> { id, name, image, watchedEpisodes: { episodeId: true }, totalEpisodes, addedAt, lastWatchedAt }
-  movies: {}, // id -> { id, name, image, duration, watched, addedAt, watchedAt }
+  shows: {}, // id -> { id, name, image, watchedEpisodes: { episodeId: true }, totalEpisodes, episodeRuntimes: { episodeId: minutes }, addedAt, lastWatchedAt }
+  movies: {}, // id -> { id, name, image, durationMinutes, watched, addedAt, watchedAt }
   lists: {}, // list name -> [{ id, type: 'show' | 'movie' }]
+  profile: {
+    username: '',
+    avatarImage: null, // { uri, focalX, focalY } | null
+    backgroundImage: null, // { uri, focalX, focalY } | null
+  },
+  settings: {
+    // HSV accent color picked in SettingsScreen (hue 0-360, saturation/value 0-100)
+    accentHue: 271,
+    accentSaturation: 40,
+    accentValue: 85,
+  },
 }
 
 export function LibraryProvider({ children }) {
@@ -86,13 +97,14 @@ export function LibraryProvider({ children }) {
         })
       },
 
-      setShowEpisodeCount(showId, totalEpisodes) {
+      setShowEpisodeCount(showId, totalEpisodes, episodeRuntimes) {
         setLibrary((prev) => {
           const show = prev.shows[showId]
-          if (!show || show.totalEpisodes === totalEpisodes) return prev
+          if (!show) return prev
+          if (show.totalEpisodes === totalEpisodes && show.episodeRuntimes) return prev
           return {
             ...prev,
-            shows: { ...prev.shows, [showId]: { ...show, totalEpisodes } },
+            shows: { ...prev.shows, [showId]: { ...show, totalEpisodes, episodeRuntimes } },
           }
         })
       },
@@ -128,7 +140,7 @@ export function LibraryProvider({ children }) {
               id: movie.id,
               name: movie.name,
               image: movie.image,
-              duration: movie.duration,
+              durationMinutes: movie.durationMinutes,
               watched: prev.movies[movie.id]?.watched ?? false,
               addedAt: prev.movies[movie.id]?.addedAt ?? Date.now(),
             },
@@ -184,6 +196,14 @@ export function LibraryProvider({ children }) {
             ),
           },
         }))
+      },
+
+      updateProfile(patch) {
+        setLibrary((prev) => ({ ...prev, profile: { ...prev.profile, ...patch } }))
+      },
+
+      updateSettings(patch) {
+        setLibrary((prev) => ({ ...prev, settings: { ...prev.settings, ...patch } }))
       },
     }),
     [library, ready]

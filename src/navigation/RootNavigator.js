@@ -1,6 +1,8 @@
+import { Platform, View, StyleSheet } from 'react-native'
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
 import { createNativeStackNavigator } from '@react-navigation/native-stack'
 import { Ionicons } from '@expo/vector-icons'
+import { BlurView } from 'expo-blur'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import ShowsScreen from '../screens/ShowsScreen'
@@ -10,7 +12,9 @@ import ExploreScreen from '../screens/ExploreScreen'
 import ProfileScreen from '../screens/ProfileScreen'
 import ShowDetailScreen from '../screens/ShowDetailScreen'
 import MovieDetailScreen from '../screens/MovieDetailScreen'
-import { colors, spacing, radius } from '../theme'
+import EditProfileScreen from '../screens/EditProfileScreen'
+import SettingsScreen from '../screens/SettingsScreen'
+import { colors, spacing, radius, useAccentColors } from '../theme'
 
 const Tab = createBottomTabNavigator()
 const Stack = createNativeStackNavigator()
@@ -25,12 +29,13 @@ const ICONS = {
 
 function Tabs() {
   const insets = useSafeAreaInsets()
+  const { accent } = useAccentColors()
 
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
         headerShown: false,
-        tabBarActiveTintColor: colors.accent,
+        tabBarActiveTintColor: accent,
         tabBarInactiveTintColor: colors.textDim,
         tabBarStyle: {
           position: 'absolute',
@@ -38,11 +43,11 @@ function Tabs() {
           right: spacing.lg,
           bottom: insets.bottom + spacing.md,
           height: 72,
-          borderRadius: radius.pill,
+          borderRadius: radius.xl,
           borderTopWidth: 0,
-          backgroundColor: colors.card,
+          backgroundColor: 'transparent',
           borderWidth: 1,
-          borderColor: 'rgba(255,255,255,0.08)',
+          borderColor: 'rgba(255,255,255,0.12)',
           paddingBottom: 0,
           shadowColor: '#000',
           shadowOffset: { width: 0, height: 10 },
@@ -50,6 +55,12 @@ function Tabs() {
           shadowRadius: 16,
           elevation: 12,
         },
+        tabBarBackground: () =>
+          Platform.OS === 'ios' ? (
+            <BlurView intensity={100} tint="systemThinMaterialDark" style={styles.blur} />
+          ) : (
+            <View style={styles.solidBackground} />
+          ),
         tabBarItemStyle: { justifyContent: 'center' },
         tabBarIconStyle: { flex: 0, height: 34, marginBottom: 2 },
         tabBarLabelStyle: { fontSize: 10, fontWeight: '600' },
@@ -65,6 +76,15 @@ function Tabs() {
   )
 }
 
+const styles = StyleSheet.create({
+  blur: { flex: 1, borderRadius: radius.xl, overflow: 'hidden' },
+  solidBackground: {
+    flex: 1,
+    borderRadius: radius.xl,
+    backgroundColor: colors.card,
+  },
+})
+
 export default function RootNavigator() {
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
@@ -77,6 +97,16 @@ export default function RootNavigator() {
       <Stack.Screen
         name="MovieDetail"
         component={MovieDetailScreen}
+        options={{ presentation: 'card' }}
+      />
+      <Stack.Screen
+        name="EditProfile"
+        component={EditProfileScreen}
+        options={{ presentation: 'card' }}
+      />
+      <Stack.Screen
+        name="Settings"
+        component={SettingsScreen}
         options={{ presentation: 'card' }}
       />
     </Stack.Navigator>

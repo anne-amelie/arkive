@@ -1,8 +1,9 @@
 import { View, Image, Pressable, StyleSheet } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
-import { colors } from '../theme'
+import { colors, useAccentColors } from '../theme'
 
 export default function ShowCard({ show, onPress, showProgress = true }) {
+  const { accent } = useAccentColors()
   if (!show) return null
 
   return (
@@ -17,7 +18,10 @@ export default function ShowCard({ show, onPress, showProgress = true }) {
       {showProgress && typeof show.progress === 'number' && show.progress > 0 && (
         <View style={styles.progressTrack}>
           <View
-            style={[styles.progressFill, { width: `${Math.min(100, Math.round(show.progress * 100))}%` }]}
+            style={[
+              styles.progressFill,
+              { width: `${Math.min(100, Math.round(show.progress * 100))}%`, backgroundColor: accent },
+            ]}
           />
         </View>
       )}
@@ -53,6 +57,5 @@ const styles = StyleSheet.create({
   },
   progressFill: {
     height: '100%',
-    backgroundColor: colors.accent,
   },
 })

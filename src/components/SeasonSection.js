@@ -1,6 +1,6 @@
 import { View, Text, Pressable, StyleSheet } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
-import { colors, spacing, radius, shadow } from '../theme'
+import { colors, spacing, radius, shadow, useAccentColors } from '../theme'
 
 export default function SeasonSection({
   seasonNumber,
@@ -10,6 +10,7 @@ export default function SeasonSection({
   onToggleExpand,
   onToggleSeason,
 }) {
+  const { accent, accentDim } = useAccentColors()
   const progress = episodeCount > 0 ? watchedCount / episodeCount : 0
   const allWatched = watchedCount === episodeCount && episodeCount > 0
 
@@ -31,7 +32,7 @@ export default function SeasonSection({
               <Ionicons
                 name={allWatched ? 'checkmark-circle' : 'checkmark-circle-outline'}
                 size={22}
-                color={allWatched ? colors.accent : colors.textDim}
+                color={allWatched ? accent : colors.textDim}
               />
             </Pressable>
             <Ionicons
@@ -42,8 +43,13 @@ export default function SeasonSection({
           </View>
         </View>
 
-        <View style={styles.progressTrack}>
-          <View style={[styles.progressFill, { width: `${Math.round(progress * 100)}%` }]} />
+        <View style={[styles.progressTrack, { backgroundColor: accentDim }]}>
+          <View
+            style={[
+              styles.progressFill,
+              { width: `${Math.round(progress * 100)}%`, backgroundColor: accent },
+            ]}
+          />
         </View>
       </Pressable>
     </View>
@@ -76,8 +82,7 @@ const styles = StyleSheet.create({
   progressTrack: {
     height: 6,
     borderRadius: radius.pill,
-    backgroundColor: colors.accentDim,
     overflow: 'hidden',
   },
-  progressFill: { height: '100%', backgroundColor: colors.accent, borderRadius: radius.pill },
+  progressFill: { height: '100%', borderRadius: radius.pill },
 })

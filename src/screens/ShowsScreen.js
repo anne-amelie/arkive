@@ -1,9 +1,15 @@
 import { useMemo, useState } from 'react'
-import { View, Text, ScrollView, Pressable, StyleSheet } from 'react-native'
+import { Text, ScrollView, StyleSheet } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { useLibrary } from '../store/LibraryContext'
 import Shelf from '../components/Shelf'
+import SegmentedTabs from '../components/SegmentedTabs'
 import { colors, spacing, tabBarClearance } from '../theme'
+
+const TAB_OPTIONS = [
+  { key: 'watchlist', label: 'Watch List' },
+  { key: 'upcoming', label: 'Upcoming' },
+]
 
 const STALE_DAYS = 21
 
@@ -43,14 +49,12 @@ export default function ShowsScreen({ navigation }) {
     <SafeAreaView style={styles.safe} edges={['top']}>
       <Text style={styles.title}>Shows</Text>
 
-      <View style={styles.tabs}>
-        <Pressable onPress={() => setTab('watchlist')}>
-          <Text style={[styles.tab, tab === 'watchlist' && styles.tabActive]}>Watch List</Text>
-        </Pressable>
-        <Pressable onPress={() => setTab('upcoming')}>
-          <Text style={[styles.tab, tab === 'upcoming' && styles.tabActive]}>Upcoming</Text>
-        </Pressable>
-      </View>
+      <SegmentedTabs
+        options={TAB_OPTIONS}
+        value={tab}
+        onChange={setTab}
+        style={{ marginBottom: spacing.md }}
+      />
 
       <ScrollView contentContainerStyle={{ paddingBottom: tabBarClearance }}>
         {tab === 'watchlist' ? (
@@ -83,25 +87,6 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     textAlign: 'center',
     paddingVertical: spacing.md,
-  },
-  tabs: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    gap: 32,
-    paddingBottom: spacing.md,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border,
-  },
-  tab: {
-    color: colors.textDim,
-    fontSize: 15,
-    paddingBottom: 10,
-  },
-  tabActive: {
-    color: colors.text,
-    fontWeight: '600',
-    borderBottomWidth: 2,
-    borderBottomColor: colors.text,
   },
   emptyMsg: {
     color: colors.textDim,

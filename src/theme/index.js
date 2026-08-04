@@ -1,4 +1,6 @@
 import { Platform } from 'react-native'
+import { useLibrary } from '../store/LibraryContext'
+import { darkenHex, hexToRgba, hsvToHex } from '../utils/color'
 
 export const colors = {
   bg: '#0e0e10',
@@ -7,9 +9,9 @@ export const colors = {
   cardEmpty: '#2a2a2d',
   text: '#f5f5f4',
   textDim: '#9a9a9e',
-  accent: '#d9cf4c',
-  accentDim: '#8a8330',
-  accentSoft: 'rgba(217,207,76,0.16)',
+  accent: '#c3aed6',
+  accentDim: '#5f5270',
+  accentSoft: 'rgba(195,174,214,0.18)',
   border: '#232326',
   overlay: 'rgba(0,0,0,0.4)',
   chip: 'rgba(255,255,255,0.08)',
@@ -46,3 +48,18 @@ export const shadow = Platform.select({
   android: { elevation: 6 },
   default: {},
 })
+
+// The accent color is user-configurable (see SettingsScreen). Everything else
+// in `colors` is fixed, so only these three derived values need to be reactive.
+export function useAccentColors() {
+  const { library } = useLibrary()
+  const hue = library.settings?.accentHue ?? 271
+  const saturation = library.settings?.accentSaturation ?? 40
+  const value = library.settings?.accentValue ?? 85
+  const accent = hsvToHex(hue, saturation, value)
+  return {
+    accent,
+    accentDim: darkenHex(accent, 0.5),
+    accentSoft: hexToRgba(accent, 0.18),
+  }
+}

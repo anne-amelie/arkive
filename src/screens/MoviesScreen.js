@@ -1,10 +1,16 @@
 import { useMemo, useState } from 'react'
-import { View, Text, ScrollView, Pressable, StyleSheet } from 'react-native'
+import { Text, ScrollView, StyleSheet } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { useLibrary } from '../store/LibraryContext'
 import ShowCard from '../components/ShowCard'
 import CardGrid from '../components/CardGrid'
+import SegmentedTabs from '../components/SegmentedTabs'
 import { colors, spacing, tabBarClearance } from '../theme'
+
+const TAB_OPTIONS = [
+  { key: 'toWatch', label: 'To watch' },
+  { key: 'watched', label: 'Watched' },
+]
 
 export default function MoviesScreen({ navigation }) {
   const { library } = useLibrary()
@@ -28,14 +34,12 @@ export default function MoviesScreen({ navigation }) {
     <SafeAreaView style={styles.safe} edges={['top']}>
       <Text style={styles.title}>Movies</Text>
 
-      <View style={styles.tabs}>
-        <Pressable onPress={() => setTab('toWatch')}>
-          <Text style={[styles.tab, tab === 'toWatch' && styles.tabActive]}>To watch</Text>
-        </Pressable>
-        <Pressable onPress={() => setTab('watched')}>
-          <Text style={[styles.tab, tab === 'watched' && styles.tabActive]}>Watched</Text>
-        </Pressable>
-      </View>
+      <SegmentedTabs
+        options={TAB_OPTIONS}
+        value={tab}
+        onChange={setTab}
+        style={{ marginBottom: spacing.md }}
+      />
 
       <ScrollView contentContainerStyle={{ paddingBottom: tabBarClearance }}>
         {movies.length === 0 ? (
@@ -66,21 +70,6 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     textAlign: 'center',
     paddingVertical: spacing.md,
-  },
-  tabs: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    gap: 32,
-    paddingBottom: spacing.md,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border,
-  },
-  tab: { color: colors.textDim, fontSize: 15, paddingBottom: 10 },
-  tabActive: {
-    color: colors.text,
-    fontWeight: '600',
-    borderBottomWidth: 2,
-    borderBottomColor: colors.text,
   },
   emptyMsg: { color: colors.textDim, textAlign: 'center', padding: 40, fontSize: 14 },
 })

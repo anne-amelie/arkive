@@ -1,7 +1,7 @@
 import { View, Text, Image, Pressable, StyleSheet } from 'react-native'
 import { LinearGradient } from 'expo-linear-gradient'
 import { Ionicons } from '@expo/vector-icons'
-import { colors, spacing, radius, shadow } from '../theme'
+import { colors, spacing, radius, shadow, useAccentColors } from '../theme'
 
 export default function DetailHero({
   backdrop,
@@ -17,6 +17,7 @@ export default function DetailHero({
   onToggleFavorite,
   onAddToList,
 }) {
+  const { accent, accentDim, accentSoft } = useAccentColors()
   const backdropSource = backdrop || poster
 
   return (
@@ -48,7 +49,7 @@ export default function DetailHero({
               <Ionicons
                 name={inLibrary ? 'heart' : 'heart-outline'}
                 size={19}
-                color={inLibrary ? colors.accent : colors.text}
+                color={inLibrary ? accent : colors.text}
               />
             </Pressable>
             <Pressable style={styles.iconBtn} onPress={onAddToList}>
@@ -74,9 +75,9 @@ export default function DetailHero({
 
           <View style={styles.metaRow}>
             {typeof rating === 'number' && rating > 0 && (
-              <View style={styles.ratingBadge}>
-                <Ionicons name="star" size={12} color={colors.accent} />
-                <Text style={styles.ratingText}>{rating.toFixed(1)}</Text>
+              <View style={[styles.ratingBadge, { backgroundColor: accentSoft }]}>
+                <Ionicons name="star" size={12} color={accent} />
+                <Text style={[styles.ratingText, { color: accent }]}>{rating.toFixed(1)}</Text>
               </View>
             )}
             {year && <Text style={styles.metaText}>{year}</Text>}
@@ -98,8 +99,13 @@ export default function DetailHero({
       {typeof progress === 'number' && (
         <View style={styles.progressSection}>
           <Text style={styles.progressLabel}>{Math.round(progress * 100)}% watched</Text>
-          <View style={styles.progressTrack}>
-            <View style={[styles.progressFill, { width: `${Math.round(progress * 100)}%` }]} />
+          <View style={[styles.progressTrack, { backgroundColor: accentDim }]}>
+            <View
+              style={[
+                styles.progressFill,
+                { width: `${Math.round(progress * 100)}%`, backgroundColor: accent },
+              ]}
+            />
           </View>
         </View>
       )}
@@ -185,12 +191,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
-    backgroundColor: colors.accentSoft,
     paddingHorizontal: 7,
     paddingVertical: 3,
     borderRadius: radius.sm,
   },
-  ratingText: { color: colors.accent, fontSize: 12, fontWeight: '700' },
+  ratingText: { fontSize: 12, fontWeight: '700' },
   metaText: { color: colors.textDim, fontSize: 13 },
   genreRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginTop: 8 },
   chip: {
@@ -208,10 +213,9 @@ const styles = StyleSheet.create({
   progressTrack: {
     height: 6,
     borderRadius: radius.pill,
-    backgroundColor: colors.accentDim,
     overflow: 'hidden',
   },
-  progressFill: { height: '100%', backgroundColor: colors.accent, borderRadius: radius.pill },
+  progressFill: { height: '100%', borderRadius: radius.pill },
   progressLabel: {
     color: colors.textDim,
     fontSize: 12,

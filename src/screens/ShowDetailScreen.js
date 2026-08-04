@@ -69,7 +69,12 @@ export default function ShowDetailScreen({ route, navigation }) {
   const watchedEpisodes = library.shows[id]?.watchedEpisodes ?? {}
 
   useEffect(() => {
-    if (inLibrary && episodes.length > 0) setShowEpisodeCount(id, episodes.length)
+    if (inLibrary && episodes.length > 0) {
+      const episodeRuntimes = Object.fromEntries(
+        episodes.filter((ep) => ep.runtime).map((ep) => [ep.id, ep.runtime])
+      )
+      setShowEpisodeCount(id, episodes.length, episodeRuntimes)
+    }
   }, [inLibrary, episodes.length, id, setShowEpisodeCount])
 
   const progress =
