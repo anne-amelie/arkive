@@ -35,14 +35,14 @@ export default function AddToListSheet({ visible, onClose, id, type }) {
     <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
       <Pressable style={styles.backdrop} onPress={onClose} />
       <View style={styles.sheet}>
-        <Text style={styles.title}>Ajouter à une liste</Text>
+        <Text style={styles.title}>Add to a list</Text>
 
         <FlatList
           data={listNames}
           keyExtractor={(name) => name}
           style={{ maxHeight: 260 }}
           ListEmptyComponent={
-            <Text style={styles.emptyMsg}>Aucune liste pour l'instant, crées-en une.</Text>
+            <Text style={styles.emptyMsg}>No lists yet, create one.</Text>
           }
           renderItem={({ item: name }) => (
             <Pressable style={styles.row} onPress={() => toggleList(name)}>
@@ -61,7 +61,7 @@ export default function AddToListSheet({ visible, onClose, id, type }) {
             value={newListName}
             onChangeText={setNewListName}
             onSubmitEditing={handleCreate}
-            placeholder="Nouvelle liste"
+            placeholder="New list"
             placeholderTextColor={colors.textDim}
             style={styles.input}
           />
@@ -71,7 +71,7 @@ export default function AddToListSheet({ visible, onClose, id, type }) {
         </View>
 
         <Pressable style={styles.closeBtn} onPress={onClose}>
-          <Text style={styles.closeBtnText}>Fermer</Text>
+          <Text style={styles.closeBtnText}>Close</Text>
         </Pressable>
       </View>
     </Modal>

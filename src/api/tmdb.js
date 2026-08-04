@@ -1,27 +1,25 @@
-// Client léger pour l'API TMDb (The Movie Database) v3
-// Doc officielle : https://developer.themoviedb.org/reference/intro/getting-started
+// Lightweight client for the TMDb (The Movie Database) v3 API
+// Official docs: https://developer.themoviedb.org/reference/intro/getting-started
 const BASE_URL = 'https://api.themoviedb.org/3'
 const API_KEY = process.env.EXPO_PUBLIC_TMDB_API_KEY
 const IMAGE_BASE = 'https://image.tmdb.org/t/p'
 
 async function request(path, { params } = {}) {
   if (!API_KEY) {
-    throw new Error(
-      "Clé API TMDb manquante. Ajoute EXPO_PUBLIC_TMDB_API_KEY dans ton fichier .env"
-    )
+    throw new Error('Missing TMDb API key. Add EXPO_PUBLIC_TMDB_API_KEY to your .env file')
   }
 
-  const query = new URLSearchParams({ api_key: API_KEY, language: 'fr-FR', ...params })
+  const query = new URLSearchParams({ api_key: API_KEY, language: 'en-US', ...params })
   const res = await fetch(`${BASE_URL}${path}?${query}`)
 
   if (!res.ok) {
-    throw new Error(`Erreur TMDb ${res.status} sur ${path}`)
+    throw new Error(`TMDb error ${res.status} on ${path}`)
   }
 
   return res.json()
 }
 
-// --- Endpoints utilisés par l'app ---
+// --- Endpoints used by the app ---
 
 export async function searchSeries(query, { limit = 20 } = {}) {
   if (!query?.trim()) return []
@@ -65,8 +63,8 @@ export async function getMovieExtended(id) {
   }
 }
 
-// Récupère la totalité des épisodes (toutes saisons) pour construire la liste saisons/épisodes.
-// `seasons` peut être passé (depuis getSeriesExtended) pour éviter un appel /tv/{id} redondant.
+// Fetches every episode (across all seasons) to build the season/episode list.
+// `seasons` can be passed in (from getSeriesExtended) to avoid a redundant /tv/{id} call.
 export async function getAllSeriesEpisodes(id, seasons) {
   const seasonList = seasons ?? (await request(`/tv/${id}`)).seasons ?? []
 
@@ -85,13 +83,13 @@ export async function getAllSeriesEpisodes(id, seasons) {
   )
 }
 
-// Helper : construit une URL d'image utilisable directement
+// Helper: builds a directly usable image URL
 export function artworkUrl(path, size = 'w500') {
   if (!path) return null
   return path.startsWith('http') ? path : `${IMAGE_BASE}/${size}${path}`
 }
 
-// Helper : formate une durée en minutes (ex: 128 -> "2h 08min")
+// Helper: formats a duration in minutes (e.g. 128 -> "2h 08min")
 export function formatRuntime(minutes) {
   if (!minutes || minutes <= 0) return null
   const h = Math.floor(minutes / 60)

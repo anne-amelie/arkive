@@ -26,7 +26,10 @@ export default function MovieDetailScreen({ route, navigation }) {
           setStatus('done')
         }
       })
-      .catch(() => !cancelled && setStatus('error'))
+      .catch((err) => {
+        console.error(err)
+        if (!cancelled) setStatus('error')
+      })
     return () => {
       cancelled = true
     }
@@ -42,7 +45,7 @@ export default function MovieDetailScreen({ route, navigation }) {
     } else {
       addMovieToWatchlist({
         id,
-        name: movie?.name || 'Film',
+        name: movie?.name || 'Movie',
         image: artworkUrl(movie?.image),
         duration,
       })
@@ -52,9 +55,9 @@ export default function MovieDetailScreen({ route, navigation }) {
   return (
     <SafeAreaView style={styles.safe} edges={['top']}>
       <ScrollView contentContainerStyle={{ paddingBottom: spacing.xl }}>
-        {status === 'loading' && <Text style={styles.emptyMsg}>Chargement...</Text>}
+        {status === 'loading' && <Text style={styles.emptyMsg}>Loading...</Text>}
         {status === 'error' && (
-          <Text style={styles.emptyMsg}>Impossible de charger ce film depuis TMDb.</Text>
+          <Text style={styles.emptyMsg}>Couldn't load this movie from TMDb.</Text>
         )}
 
         {movie && (
@@ -80,7 +83,7 @@ export default function MovieDetailScreen({ route, navigation }) {
 
               {inLibrary && (
                 <Pressable style={styles.watchedRow} onPress={() => toggleMovieWatched(id)}>
-                  <Text style={styles.watchedLabel}>Marquer comme vu</Text>
+                  <Text style={styles.watchedLabel}>Mark as watched</Text>
                   <Ionicons
                     name={watched ? 'checkmark-circle' : 'checkmark-circle-outline'}
                     size={22}

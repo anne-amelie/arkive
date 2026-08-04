@@ -1,9 +1,10 @@
 import { useEffect, useRef, useState } from 'react'
-import { View, Text, TextInput, FlatList, Pressable, StyleSheet } from 'react-native'
+import { View, Text, TextInput, ScrollView, Pressable, StyleSheet } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { Ionicons } from '@expo/vector-icons'
 import { searchSeries, searchMovies, artworkUrl } from '../api/tmdb'
 import ShowCard from '../components/ShowCard'
+import CardGrid from '../components/CardGrid'
 import { colors, spacing } from '../theme'
 
 export default function ExploreScreen({ navigation }) {
@@ -47,10 +48,10 @@ export default function ExploreScreen({ navigation }) {
 
       <View style={styles.tabs}>
         <Pressable onPress={() => setMediaType('series')}>
-          <Text style={[styles.tab, mediaType === 'series' && styles.tabActive]}>Séries</Text>
+          <Text style={[styles.tab, mediaType === 'series' && styles.tabActive]}>Shows</Text>
         </Pressable>
         <Pressable onPress={() => setMediaType('movie')}>
-          <Text style={[styles.tab, mediaType === 'movie' && styles.tabActive]}>Films</Text>
+          <Text style={[styles.tab, mediaType === 'movie' && styles.tabActive]}>Movies</Text>
         </Pressable>
       </View>
 
@@ -59,7 +60,7 @@ export default function ExploreScreen({ navigation }) {
         <TextInput
           value={query}
           onChangeText={setQuery}
-          placeholder={mediaType === 'series' ? 'Rechercher une série...' : 'Rechercher un film...'}
+          placeholder={mediaType === 'series' ? 'Search for a show...' : 'Search for a movie...'}
           placeholderTextColor={colors.textDim}
           style={styles.searchInput}
         />
@@ -70,26 +71,30 @@ export default function ExploreScreen({ navigation }) {
         )}
       </View>
 
-      {status === 'loading' && <Text style={styles.emptyMsg}>Recherche en cours...</Text>}
+      {status === 'loading' && <Text style={styles.emptyMsg}>Searching...</Text>}
       {status === 'error' && (
         <Text style={styles.emptyMsg}>
-          Impossible de contacter TMDb. Vérifie ta clé API dans le fichier .env.
+          Couldn't reach TMDb. Check your API key in the .env file.
         </Text>
       )}
       {status === 'done' && results.length === 0 && (
-        <Text style={styles.emptyMsg}>Aucun résultat pour "{query}".</Text>
+        <Text style={styles.emptyMsg}>No results for "{query}".</Text>
       )}
 
-      <FlatList
-        data={results}
-        keyExtractor={(item) => String(item.id)}
-        numColumns={3}
-        columnWrapperStyle={{ gap: 10 }}
-        contentContainerStyle={{ gap: 10, padding: spacing.md }}
-        renderItem={({ item }) => (
-          <ShowCard show={item} showProgress={false} onPress={() => goToItem(item)} />
-        )}
-      />
+      <ScrollView contentContainerStyle={{ paddingBottom: spacing.xl }}>
+        <CardGrid
+          items={results}
+          style={{ paddingTop: spacing.sm }}
+          renderItem={(item) => (
+            <ShowCard
+              key={item.id}
+              show={item}
+              showProgress={false}
+              onPress={() => goToItem(item)}
+            />
+          )}
+        />
+      </ScrollView>
     </SafeAreaView>
   )
 }

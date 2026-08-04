@@ -4,6 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 import { Ionicons } from '@expo/vector-icons'
 import { useLibrary } from '../store/LibraryContext'
 import ShowCard from '../components/ShowCard'
+import CardGrid from '../components/CardGrid'
 import { colors, spacing } from '../theme'
 
 export default function MyListsScreen({ navigation }) {
@@ -28,8 +29,8 @@ export default function MyListsScreen({ navigation }) {
       <ScrollView contentContainerStyle={{ paddingBottom: spacing.xl }}>
         {listNames.length === 0 && (
           <Text style={styles.emptyMsg}>
-            Tu n'as pas encore de liste. Crée-en une pour organiser tes séries (ex : "À revoir",
-            "Coup de cœur"...).
+            You don't have any lists yet. Create one to organize your shows (e.g. "To rewatch",
+            "Favorites"...).
           </Text>
         )}
 
@@ -71,8 +72,9 @@ export default function MyListsScreen({ navigation }) {
                     <Text style={styles.emptyBoxText}>There's nothing in this list yet</Text>
                   </View>
                 ) : (
-                  <View style={styles.grid}>
-                    {items.map((item) => (
+                  <CardGrid
+                    items={items}
+                    renderItem={(item) => (
                       <ShowCard
                         key={`${item.type}-${item.id}`}
                         show={item}
@@ -83,8 +85,8 @@ export default function MyListsScreen({ navigation }) {
                           )
                         }
                       />
-                    ))}
-                  </View>
+                    )}
+                  />
                 ))}
             </View>
           )
@@ -97,13 +99,13 @@ export default function MyListsScreen({ navigation }) {
             onChangeText={setNewListName}
             onBlur={handleCreate}
             onSubmitEditing={handleCreate}
-            placeholder="Nom de la liste"
+            placeholder="List name"
             placeholderTextColor={colors.textDim}
             style={styles.input}
           />
         ) : (
           <Pressable style={styles.newListBtn} onPress={() => setShowInput(true)}>
-            <Text style={styles.newListBtnText}>+ Nouvelle liste</Text>
+            <Text style={styles.newListBtnText}>+ New list</Text>
           </Pressable>
         )}
       </ScrollView>
@@ -138,12 +140,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   emptyBoxText: { color: colors.textDim, fontSize: 15 },
-  grid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 10,
-    paddingHorizontal: spacing.md,
-  },
   input: {
     marginHorizontal: spacing.md,
     marginTop: spacing.md,

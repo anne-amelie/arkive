@@ -38,7 +38,10 @@ export default function ShowDetailScreen({ route, navigation }) {
           setStatus('done')
         }
       })
-      .catch(() => !cancelled && setStatus('error'))
+      .catch((err) => {
+        console.error(err)
+        if (!cancelled) setStatus('error')
+      })
     return () => {
       cancelled = true
     }
@@ -77,7 +80,7 @@ export default function ShowDetailScreen({ route, navigation }) {
     if (inLibrary) {
       removeFromWatchlist(id)
     } else {
-      addToWatchlist({ id, name: series?.name || 'Série', image: artworkUrl(series?.image) })
+      addToWatchlist({ id, name: series?.name || 'Show', image: artworkUrl(series?.image) })
     }
   }
 
@@ -90,9 +93,9 @@ export default function ShowDetailScreen({ route, navigation }) {
 
   return (
     <SafeAreaView style={styles.safe} edges={['top']}>
-      {status === 'loading' && <Text style={styles.emptyMsg}>Chargement...</Text>}
+      {status === 'loading' && <Text style={styles.emptyMsg}>Loading...</Text>}
       {status === 'error' && (
-        <Text style={styles.emptyMsg}>Impossible de charger cette série depuis TMDb.</Text>
+        <Text style={styles.emptyMsg}>Couldn't load this show from TMDb.</Text>
       )}
 
       {series && (
