@@ -68,7 +68,7 @@ export default function ShowsScreen({ navigation }) {
         ) : (
           <Text style={styles.emptyMsg}>
             Les prochains épisodes à venir s'afficheront ici une fois connectés aux dates de
-            diffusion TheTVDB.
+            diffusion TMDb.
           </Text>
         )}
       </ScrollView>

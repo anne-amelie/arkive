@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { View, Text, Pressable, ScrollView, StyleSheet } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { Ionicons } from '@expo/vector-icons'
-import { getMovieExtended, artworkUrl, formatRuntime } from '../api/tvdb'
+import { getMovieExtended, artworkUrl, formatRuntime } from '../api/tmdb'
 import { useLibrary } from '../store/LibraryContext'
 import DetailHero from '../components/DetailHero'
 import AddToListSheet from '../components/AddToListSheet'
@@ -54,7 +54,7 @@ export default function MovieDetailScreen({ route, navigation }) {
       <ScrollView contentContainerStyle={{ paddingBottom: spacing.xl }}>
         {status === 'loading' && <Text style={styles.emptyMsg}>Chargement...</Text>}
         {status === 'error' && (
-          <Text style={styles.emptyMsg}>Impossible de charger ce film depuis TheTVDB.</Text>
+          <Text style={styles.emptyMsg}>Impossible de charger ce film depuis TMDb.</Text>
         )}
 
         {movie && (

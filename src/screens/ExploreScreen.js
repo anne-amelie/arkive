@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { View, Text, TextInput, FlatList, Pressable, StyleSheet } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { Ionicons } from '@expo/vector-icons'
-import { searchSeries, searchMovies, artworkUrl } from '../api/tvdb'
+import { searchSeries, searchMovies, artworkUrl } from '../api/tmdb'
 import ShowCard from '../components/ShowCard'
 import { colors, spacing } from '../theme'
 
@@ -27,13 +27,7 @@ export default function ExploreScreen({ navigation }) {
       try {
         const search = mediaType === 'series' ? searchSeries : searchMovies
         const data = await search(query)
-        setResults(
-          (data || []).map((item) => ({
-            id: item.tvdb_id || item.id,
-            name: item.name || item.translations?.eng || 'Sans titre',
-            image: artworkUrl(item.image_url || item.image),
-          }))
-        )
+        setResults((data || []).map((item) => ({ ...item, image: artworkUrl(item.image) })))
         setStatus('done')
       } catch (err) {
         console.error(err)
@@ -79,7 +73,7 @@ export default function ExploreScreen({ navigation }) {
       {status === 'loading' && <Text style={styles.emptyMsg}>Recherche en cours...</Text>}
       {status === 'error' && (
         <Text style={styles.emptyMsg}>
-          Impossible de contacter TheTVDB. Vérifie ta clé API dans le fichier .env.
+          Impossible de contacter TMDb. Vérifie ta clé API dans le fichier .env.
         </Text>
       )}
       {status === 'done' && results.length === 0 && (

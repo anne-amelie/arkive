@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { View, Text, SectionList, StyleSheet } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
-import { getSeriesExtended, getAllSeriesEpisodes, artworkUrl } from '../api/tvdb'
+import { getSeriesExtended, getAllSeriesEpisodes, artworkUrl } from '../api/tmdb'
 import { useLibrary } from '../store/LibraryContext'
 import DetailHero from '../components/DetailHero'
 import SeasonSection from '../components/SeasonSection'
@@ -28,10 +28,12 @@ export default function ShowDetailScreen({ route, navigation }) {
   useEffect(() => {
     let cancelled = false
     setStatus('loading')
-    Promise.all([getSeriesExtended(id), getAllSeriesEpisodes(id)])
-      .then(([seriesData, episodesData]) => {
+    getSeriesExtended(id)
+      .then(async (seriesData) => {
+        if (cancelled) return
+        setSeries(seriesData)
+        const episodesData = await getAllSeriesEpisodes(id, seriesData.seasons)
         if (!cancelled) {
-          setSeries(seriesData)
           setEpisodes(episodesData)
           setStatus('done')
         }
@@ -90,7 +92,7 @@ export default function ShowDetailScreen({ route, navigation }) {
     <SafeAreaView style={styles.safe} edges={['top']}>
       {status === 'loading' && <Text style={styles.emptyMsg}>Chargement...</Text>}
       {status === 'error' && (
-        <Text style={styles.emptyMsg}>Impossible de charger cette série depuis TheTVDB.</Text>
+        <Text style={styles.emptyMsg}>Impossible de charger cette série depuis TMDb.</Text>
       )}
 
       {series && (
