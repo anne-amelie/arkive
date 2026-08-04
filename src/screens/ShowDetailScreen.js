@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { View, Text, SectionList, StyleSheet } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { getSeriesExtended, getAllSeriesEpisodes, artworkUrl } from '../api/tmdb'
@@ -23,7 +23,8 @@ export default function ShowDetailScreen({ route, navigation }) {
   const [episodes, setEpisodes] = useState([])
   const [status, setStatus] = useState('loading')
   const [listSheetOpen, setListSheetOpen] = useState(false)
-  const [expandedSeasons, setExpandedSeasons] = useState({})
+  const [expandedSeason, setExpandedSeason] = useState(null)
+  const sectionListRef = useRef(null)
 
   useEffect(() => {
     let cancelled = false
@@ -88,8 +89,20 @@ export default function ShowDetailScreen({ route, navigation }) {
     key: String(season.seasonNumber),
     seasonNumber: season.seasonNumber,
     episodes: season.episodes,
-    data: expandedSeasons[season.seasonNumber] ? season.episodes : [],
+    data: season.seasonNumber === expandedSeason ? season.episodes : [],
   }))
+
+  useEffect(() => {
+    if (expandedSeason === null) return
+    const sectionIndex = sections.findIndex((s) => s.seasonNumber === expandedSeason)
+    if (sectionIndex === -1 || sections[sectionIndex].episodes.length === 0) return
+    sectionListRef.current?.scrollToLocation({
+      sectionIndex,
+      itemIndex: 0,
+      viewPosition: 0,
+    })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [expandedSeason])
 
   return (
     <SafeAreaView style={styles.safe} edges={['top']}>
@@ -101,6 +114,7 @@ export default function ShowDetailScreen({ route, navigation }) {
       {series && (
         <>
           <SectionList
+            ref={sectionListRef}
             sections={sections}
             keyExtractor={(episode) => String(episode.id)}
             stickySectionHeadersEnabled
@@ -132,12 +146,11 @@ export default function ShowDetailScreen({ route, navigation }) {
                 seasonNumber={section.seasonNumber}
                 episodeCount={section.episodes.length}
                 watchedCount={section.episodes.filter((ep) => watchedEpisodes[ep.id]).length}
-                expanded={Boolean(expandedSeasons[section.seasonNumber])}
+                expanded={section.seasonNumber === expandedSeason}
                 onToggleExpand={() =>
-                  setExpandedSeasons((prev) => ({
-                    ...prev,
-                    [section.seasonNumber]: !prev[section.seasonNumber],
-                  }))
+                  setExpandedSeason((prev) =>
+                    prev === section.seasonNumber ? null : section.seasonNumber
+                  )
                 }
                 onToggleSeason={(watched) =>
                   setSeasonWatched(
