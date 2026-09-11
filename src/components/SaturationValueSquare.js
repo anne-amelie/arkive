@@ -18,24 +18,21 @@ export default function SaturationValueSquare({ hue, saturation, value, onChange
   // Refs so the PanResponder (created once) always reads fresh values.
   const sizeRef = useRef(size)
   sizeRef.current = size
-  const satRef = useRef(saturation)
-  satRef.current = saturation
-  const valRef = useRef(value)
-  valRef.current = value
   const onChangeRef = useRef(onChange)
   onChangeRef.current = onChange
-  const dragStart = useRef({ saturation, value })
+
+  const dragOrigin = useRef({ x: 0, y: 0 })
 
   const panResponder = useRef(
     PanResponder.create({
       onStartShouldSetPanResponder: () => true,
       onMoveShouldSetPanResponder: () => true,
       onPanResponderGrant: (e) => {
-        dragStart.current = { saturation: satRef.current, value: valRef.current }
-        updateFromTouch(e.nativeEvent.locationX, e.nativeEvent.locationY)
+        dragOrigin.current = { x: e.nativeEvent.locationX, y: e.nativeEvent.locationY }
+        updateFromTouch(dragOrigin.current.x, dragOrigin.current.y)
       },
-      onPanResponderMove: (e) => {
-        updateFromTouch(e.nativeEvent.locationX, e.nativeEvent.locationY)
+      onPanResponderMove: (_, gesture) => {
+        updateFromTouch(dragOrigin.current.x + gesture.dx, dragOrigin.current.y + gesture.dy)
       },
     })
   ).current
