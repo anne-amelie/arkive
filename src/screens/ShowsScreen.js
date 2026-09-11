@@ -61,9 +61,9 @@ export default function ShowsScreen({ navigation }) {
         style={{ marginBottom: spacing.md }}
       />
 
-      <ScrollView contentContainerStyle={{ paddingBottom: tabBarClearance }}>
-        {tab === 'watchlist' ? (
-          shows.length === 0 ? (
+      {tab === 'watchlist' ? (
+        <ScrollView contentContainerStyle={{ paddingBottom: tabBarClearance }}>
+          {shows.length === 0 ? (
             <Text style={styles.emptyMsg}>
               Your watchlist is empty. Go to "Explore" to add some shows.
             </Text>
@@ -73,19 +73,19 @@ export default function ShowsScreen({ navigation }) {
               <Shelf title="Haven't watched in a while" shows={staleWatch} onSelect={goToShow} />
               <Shelf title="Haven't started" shows={notStarted} onSelect={goToShow} />
             </>
-          )
-        ) : completed.length === 0 ? (
-          <Text style={styles.emptyMsg}>Nothing here yet.</Text>
-        ) : (
-          <CardGrid
-            items={completed}
-            style={{ paddingTop: spacing.md }}
-            renderItem={(show) => (
-              <ShowCard key={show.id} show={show} onPress={() => goToShow(show)} />
-            )}
-          />
-        )}
-      </ScrollView>
+          )}
+        </ScrollView>
+      ) : completed.length === 0 ? (
+        <Text style={styles.emptyMsg}>Nothing here yet.</Text>
+      ) : (
+        <CardGrid
+          items={completed}
+          style={{ paddingTop: spacing.md, paddingBottom: tabBarClearance }}
+          renderItem={(show) => (
+            <ShowCard key={show.id} show={show} onPress={() => goToShow(show)} />
+          )}
+        />
+      )}
     </SafeAreaView>
   )
 }

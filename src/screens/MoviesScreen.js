@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { Text, ScrollView, StyleSheet } from 'react-native'
+import { Text, StyleSheet } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { useLibrary } from '../store/LibraryContext'
 import ShowCard from '../components/ShowCard'
@@ -41,23 +41,21 @@ export default function MoviesScreen({ navigation }) {
         style={{ marginBottom: spacing.md }}
       />
 
-      <ScrollView contentContainerStyle={{ paddingBottom: tabBarClearance }}>
-        {movies.length === 0 ? (
-          <Text style={styles.emptyMsg}>
-            Your movie list is empty. Go to "Explore" (Movies tab) to add some.
-          </Text>
-        ) : shown.length === 0 ? (
-          <Text style={styles.emptyMsg}>Nothing here yet.</Text>
-        ) : (
-          <CardGrid
-            items={shown}
-            style={{ paddingTop: spacing.md }}
-            renderItem={(movie) => (
-              <ShowCard key={movie.id} show={movie} onPress={() => goToMovie(movie)} />
-            )}
-          />
-        )}
-      </ScrollView>
+      {movies.length === 0 ? (
+        <Text style={styles.emptyMsg}>
+          Your movie list is empty. Go to "Explore" (Movies tab) to add some.
+        </Text>
+      ) : shown.length === 0 ? (
+        <Text style={styles.emptyMsg}>Nothing here yet.</Text>
+      ) : (
+        <CardGrid
+          items={shown}
+          style={{ paddingTop: spacing.md, paddingBottom: tabBarClearance }}
+          renderItem={(movie) => (
+            <ShowCard key={movie.id} show={movie} onPress={() => goToMovie(movie)} />
+          )}
+        />
+      )}
     </SafeAreaView>
   )
 }

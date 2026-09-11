@@ -42,11 +42,19 @@ export function LibraryProvider({ children }) {
       .finally(() => setReady(true))
   }, [])
 
+  // Debounced: a drag gesture (e.g. the accent color picker) can update
+  // `library` dozens of times a second. Persisting on every single change
+  // serializes the whole library and hits disk each time, which was blocking
+  // the JS thread long enough to drop touch-move events (the picker thumb
+  // "teleporting" instead of gliding). Only the last change in a burst needs
+  // to actually get written.
   useEffect(() => {
-    if (ready) {
+    if (!ready) return
+    const timeout = setTimeout(() => {
       AsyncStorage.setItem(STORAGE_KEY, JSON.stringify({ version: SCHEMA_VERSION, data: library }))
       writeBackupFile(library).catch((e) => console.warn("Couldn't write the backup file", e))
-    }
+    }, 400)
+    return () => clearTimeout(timeout)
   }, [library, ready])
 
   const api = useMemo(

@@ -5,7 +5,6 @@ import {
   Text,
   TextInput,
   Pressable,
-  ScrollView,
   Animated,
   PanResponder,
   Dimensions,
@@ -172,19 +171,18 @@ export default function PosterPickerSheet({ visible, onClose, title, onSelect, a
           <Text style={styles.emptyMsg}>Nothing watched yet — try searching instead.</Text>
         )}
 
-        <ScrollView style={styles.grid}>
-          <CardGrid
-            items={items}
-            renderItem={(item) => (
-              <ShowCard
-                key={item.id}
-                show={item}
-                showProgress={false}
-                onPress={() => pick(item.image)}
-              />
-            )}
-          />
-        </ScrollView>
+        <CardGrid
+          items={items}
+          style={styles.grid}
+          renderItem={(item) => (
+            <ShowCard
+              key={item.id}
+              show={item}
+              showProgress={false}
+              onPress={() => pick(item.image)}
+            />
+          )}
+        />
 
         <Pressable style={styles.closeBtn} onPress={onClose}>
           <Text style={styles.closeBtnText}>Cancel</Text>
@@ -245,7 +243,7 @@ const styles = StyleSheet.create({
     marginBottom: spacing.sm,
   },
   emptyMsg: { color: colors.textDim, fontSize: 13, textAlign: 'center', padding: spacing.md },
-  grid: { flex: 1, marginBottom: spacing.sm },
+  grid: { paddingBottom: spacing.sm },
   closeBtn: { alignItems: 'center', marginTop: spacing.sm },
   closeBtnText: { color: colors.textDim, fontSize: 14 },
 })
