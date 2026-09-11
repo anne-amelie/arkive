@@ -205,6 +205,16 @@ export function LibraryProvider({ children }) {
       updateSettings(patch) {
         setLibrary((prev) => ({ ...prev, settings: { ...prev.settings, ...patch } }))
       },
+
+      // Bulk-merges externally imported shows/movies (e.g. from a TV Time export) in one
+      // state update, keyed by TMDB id like the rest of the library.
+      importLibraryData({ shows = {}, movies = {} }) {
+        setLibrary((prev) => ({
+          ...prev,
+          shows: { ...prev.shows, ...shows },
+          movies: { ...prev.movies, ...movies },
+        }))
+      },
     }),
     [library, ready]
   )

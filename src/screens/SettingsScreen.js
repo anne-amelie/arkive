@@ -45,6 +45,18 @@ export default function SettingsScreen({ navigation }) {
           />
         </View>
       </View>
+
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Data</Text>
+        <Pressable
+          style={styles.row}
+          onPress={() => navigation.navigate('ImportTvTime')}
+          hitSlop={4}
+        >
+          <Text style={styles.rowLabel}>Import from TV Time</Text>
+          <Ionicons name="chevron-forward" size={18} color={colors.textDim} />
+        </Pressable>
+      </View>
     </SafeAreaView>
   )
 }
@@ -83,4 +95,11 @@ const styles = StyleSheet.create({
   },
   sectionHint: { color: colors.textDim, fontSize: 12, marginBottom: spacing.lg },
   squareWrap: { marginTop: spacing.lg },
+  row: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 4,
+  },
+  rowLabel: { color: colors.text, fontSize: 14, fontWeight: '600' },
 })

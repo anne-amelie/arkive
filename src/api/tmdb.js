@@ -41,6 +41,10 @@ export async function searchMovies(query, { limit = 20 } = {}) {
   }))
 }
 
+export async function findByExternalId(externalId, source) {
+  return request(`/find/${externalId}`, { params: { external_source: source } })
+}
+
 export async function getSeriesExtended(id) {
   const json = await request(`/tv/${id}`)
   return {
