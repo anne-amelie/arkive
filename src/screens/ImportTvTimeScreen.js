@@ -41,7 +41,7 @@ export default function ImportTvTimeScreen({ navigation }) {
       const seriesFile = files.find((f) => parseTvTimeFile(f) === 'series')
 
       if (!moviesFile && !seriesFile) {
-        setError("Ces fichiers ne ressemblent pas à un export TV Time (JSON).")
+        setError("These files don't look like a TV Time JSON export.")
         setStatus('error')
         return
       }
@@ -67,7 +67,7 @@ export default function ImportTvTimeScreen({ navigation }) {
       setStatus('done')
     } catch (e) {
       console.error(e)
-      setError("L'import a échoué. Vérifie que les fichiers sont bien des exports TV Time valides.")
+      setError('Import failed. Make sure the files are valid TV Time exports.')
       setStatus('error')
     }
   }
@@ -86,11 +86,10 @@ export default function ImportTvTimeScreen({ navigation }) {
 
       <ScrollView contentContainerStyle={styles.content}>
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Importer depuis TV Time</Text>
+          <Text style={styles.sectionTitle}>Import from TV Time</Text>
           <Text style={styles.sectionHint}>
-            Sélectionne le ou les fichiers JSON de ton export TV Time (films et/ou séries).
-            Chaque titre est retrouvé sur TMDB puis ajouté à ta bibliothèque avec son
-            historique de visionnage.
+            Select the JSON file(s) from your TV Time export (movies and/or series). Each
+            title is matched on TMDB and added to your library with its watch history.
           </Text>
 
           <Pressable
@@ -101,13 +100,13 @@ export default function ImportTvTimeScreen({ navigation }) {
             {busy ? (
               <ActivityIndicator color={colors.bg} />
             ) : (
-              <Text style={styles.buttonText}>Choisir des fichiers</Text>
+              <Text style={styles.buttonText}>Choose files</Text>
             )}
           </Pressable>
 
           {progress && (
             <Text style={styles.progressText}>
-              {progress.phase === 'movies' ? 'Films' : 'Séries'} : {progress.current}/{progress.total}
+              {progress.phase === 'movies' ? 'Movies' : 'Series'}: {progress.current}/{progress.total}
             </Text>
           )}
 
@@ -116,11 +115,11 @@ export default function ImportTvTimeScreen({ navigation }) {
 
         {summary && (
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Résultat</Text>
+            <Text style={styles.sectionTitle}>Result</Text>
 
             {summary.movies && (
               <ResultBlock
-                label="Films"
+                label="Movies"
                 matched={summary.movies.matched}
                 total={summary.movies.total}
                 unmatched={summary.movies.unmatched}
@@ -129,7 +128,7 @@ export default function ImportTvTimeScreen({ navigation }) {
 
             {summary.shows && (
               <ResultBlock
-                label="Séries"
+                label="Series"
                 matched={summary.shows.matched}
                 total={summary.shows.total}
                 unmatched={summary.shows.unmatched}
@@ -147,13 +146,13 @@ function ResultBlock({ label, matched, total, unmatched }) {
   return (
     <View style={styles.resultBlock}>
       <Text style={styles.resultLine}>
-        {label} : {matched}/{total} importés
+        {label}: {matched}/{total} imported
       </Text>
       {unmatched.length > 0 && (
         <>
           <Pressable onPress={() => setExpanded((v) => !v)}>
             <Text style={styles.resultLink}>
-              {expanded ? 'Masquer' : 'Voir'} les {unmatched.length} non trouvés
+              {expanded ? 'Hide' : 'Show'} the {unmatched.length} not found
             </Text>
           </Pressable>
           {expanded &&

@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useMemo, useState } from 'react'
 import AsyncStorage from '@react-native-async-storage/async-storage'
+import { writeBackupFile } from '../utils/backup'
 
 const LibraryContext = createContext(null)
 const STORAGE_KEY = 'arkive_library'
@@ -44,6 +45,7 @@ export function LibraryProvider({ children }) {
   useEffect(() => {
     if (ready) {
       AsyncStorage.setItem(STORAGE_KEY, JSON.stringify({ version: SCHEMA_VERSION, data: library }))
+      writeBackupFile(library).catch((e) => console.warn("Couldn't write the backup file", e))
     }
   }, [library, ready])
 

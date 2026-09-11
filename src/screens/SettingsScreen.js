@@ -1,9 +1,10 @@
-import { View, Text, Pressable, StyleSheet } from 'react-native'
+import { View, Text, Pressable, Alert, StyleSheet } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { Ionicons } from '@expo/vector-icons'
 import { useLibrary } from '../store/LibraryContext'
 import HueSlider from '../components/HueSlider'
 import SaturationValueSquare from '../components/SaturationValueSquare'
+import { shareBackup } from '../utils/backup'
 import { colors, spacing, radius, shadow, useAccentColors } from '../theme'
 
 export default function SettingsScreen({ navigation }) {
@@ -12,6 +13,16 @@ export default function SettingsScreen({ navigation }) {
   const hue = library.settings?.accentHue ?? 271
   const saturation = library.settings?.accentSaturation ?? 40
   const value = library.settings?.accentValue ?? 85
+
+  async function handleBackup() {
+    const shared = await shareBackup()
+    if (!shared) {
+      Alert.alert(
+        'Backup unavailable',
+        "File sharing isn't available on this device, or there's no data saved yet."
+      )
+    }
+  }
 
   return (
     <SafeAreaView style={styles.safe} edges={['top']}>
@@ -56,6 +67,10 @@ export default function SettingsScreen({ navigation }) {
           <Text style={styles.rowLabel}>Import from TV Time</Text>
           <Ionicons name="chevron-forward" size={18} color={colors.textDim} />
         </Pressable>
+        <Pressable style={[styles.row, styles.rowDivider]} onPress={handleBackup} hitSlop={4}>
+          <Text style={styles.rowLabel}>Back up my data</Text>
+          <Ionicons name="share-outline" size={18} color={colors.textDim} />
+        </Pressable>
       </View>
     </SafeAreaView>
   )
@@ -99,7 +114,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingVertical: 4,
+    paddingVertical: 8,
+  },
+  rowDivider: {
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: colors.border,
   },
   rowLabel: { color: colors.text, fontSize: 14, fontWeight: '600' },
 })
