@@ -5,7 +5,13 @@ import { Ionicons } from '@expo/vector-icons'
 import { searchSeries, searchMovies, artworkUrl } from '../api/tmdb'
 import ShowCard from '../components/ShowCard'
 import CardGrid from '../components/CardGrid'
-import { colors, spacing } from '../theme'
+import SegmentedTabs from '../components/SegmentedTabs'
+import { colors, spacing, tabBarClearance } from '../theme'
+
+const TAB_OPTIONS = [
+  { key: 'series', label: 'Shows' },
+  { key: 'movie', label: 'Movies' },
+]
 
 export default function ExploreScreen({ navigation }) {
   const [mediaType, setMediaType] = useState('series') // series | movie
@@ -46,14 +52,12 @@ export default function ExploreScreen({ navigation }) {
     <SafeAreaView style={styles.safe} edges={['top']}>
       <Text style={styles.title}>Explore</Text>
 
-      <View style={styles.tabs}>
-        <Pressable onPress={() => setMediaType('series')}>
-          <Text style={[styles.tab, mediaType === 'series' && styles.tabActive]}>Shows</Text>
-        </Pressable>
-        <Pressable onPress={() => setMediaType('movie')}>
-          <Text style={[styles.tab, mediaType === 'movie' && styles.tabActive]}>Movies</Text>
-        </Pressable>
-      </View>
+      <SegmentedTabs
+        options={TAB_OPTIONS}
+        value={mediaType}
+        onChange={setMediaType}
+        style={{ marginBottom: spacing.sm }}
+      />
 
       <View style={styles.searchBar}>
         <Ionicons name="search" size={18} color={colors.textDim} />
@@ -81,7 +85,7 @@ export default function ExploreScreen({ navigation }) {
         <Text style={styles.emptyMsg}>No results for "{query}".</Text>
       )}
 
-      <ScrollView contentContainerStyle={{ paddingBottom: spacing.xl }}>
+      <ScrollView contentContainerStyle={{ paddingBottom: tabBarClearance }}>
         <CardGrid
           items={results}
           style={{ paddingTop: spacing.sm }}
@@ -107,19 +111,6 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     textAlign: 'center',
     paddingVertical: spacing.md,
-  },
-  tabs: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    gap: 32,
-    paddingBottom: spacing.sm,
-  },
-  tab: { color: colors.textDim, fontSize: 15, paddingBottom: 6 },
-  tabActive: {
-    color: colors.text,
-    fontWeight: '600',
-    borderBottomWidth: 2,
-    borderBottomColor: colors.text,
   },
   searchBar: {
     flexDirection: 'row',

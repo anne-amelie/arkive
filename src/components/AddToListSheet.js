@@ -2,10 +2,11 @@ import { useState } from 'react'
 import { Modal, View, Text, TextInput, Pressable, FlatList, StyleSheet } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
 import { useLibrary } from '../store/LibraryContext'
-import { colors, spacing } from '../theme'
+import { colors, spacing, useAccentColors } from '../theme'
 
 export default function AddToListSheet({ visible, onClose, id, type }) {
   const { library, createList, addToList, removeFromList } = useLibrary()
+  const { accent } = useAccentColors()
   const [newListName, setNewListName] = useState('')
 
   const listNames = Object.keys(library.lists)
@@ -50,7 +51,7 @@ export default function AddToListSheet({ visible, onClose, id, type }) {
               <Ionicons
                 name={isInList(name) ? 'checkmark-circle' : 'checkmark-circle-outline'}
                 size={20}
-                color={isInList(name) ? colors.accent : colors.textDim}
+                color={isInList(name) ? accent : colors.textDim}
               />
             </Pressable>
           )}

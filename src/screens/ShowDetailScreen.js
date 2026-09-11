@@ -7,7 +7,7 @@ import DetailHero from '../components/DetailHero'
 import SeasonSection from '../components/SeasonSection'
 import EpisodeRow from '../components/EpisodeRow'
 import AddToListSheet from '../components/AddToListSheet'
-import { colors, spacing } from '../theme'
+import { colors, spacing, radius, shadow } from '../theme'
 
 export default function ShowDetailScreen({ route, navigation }) {
   const { id } = route.params
@@ -69,7 +69,12 @@ export default function ShowDetailScreen({ route, navigation }) {
   const watchedEpisodes = library.shows[id]?.watchedEpisodes ?? {}
 
   useEffect(() => {
-    if (inLibrary && episodes.length > 0) setShowEpisodeCount(id, episodes.length)
+    if (inLibrary && episodes.length > 0) {
+      const episodeRuntimes = Object.fromEntries(
+        episodes.filter((ep) => ep.runtime).map((ep) => [ep.id, ep.runtime])
+      )
+      setShowEpisodeCount(id, episodes.length, episodeRuntimes)
+    }
   }, [inLibrary, episodes.length, id, setShowEpisodeCount])
 
   const progress =
@@ -122,8 +127,12 @@ export default function ShowDetailScreen({ route, navigation }) {
             ListHeaderComponent={
               <>
                 <DetailHero
-                  image={series.image ? artworkUrl(series.image) : null}
+                  backdrop={series.backdrop ? artworkUrl(series.backdrop, 'w780') : null}
+                  poster={series.image ? artworkUrl(series.image) : null}
                   title={series.name}
+                  year={series.year}
+                  rating={series.rating}
+                  genres={series.genres}
                   subtitle={
                     seasonCount > 0 ? `${seasonCount} season${seasonCount > 1 ? 's' : ''}` : null
                   }
@@ -134,7 +143,7 @@ export default function ShowDetailScreen({ route, navigation }) {
                   onAddToList={() => setListSheetOpen(true)}
                 />
                 {series.overview && (
-                  <View style={{ paddingHorizontal: spacing.md, paddingTop: spacing.md }}>
+                  <View style={styles.synopsisCard}>
                     <Text style={styles.sectionTitle}>Synopsis</Text>
                     <Text style={styles.overview}>{series.overview}</Text>
                   </View>
@@ -185,6 +194,15 @@ export default function ShowDetailScreen({ route, navigation }) {
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.bg },
   emptyMsg: { color: colors.textDim, textAlign: 'center', padding: 40, fontSize: 14 },
-  sectionTitle: { color: colors.text, fontSize: 15, fontWeight: '600', marginBottom: 8 },
+  synopsisCard: {
+    marginHorizontal: spacing.md,
+    marginTop: spacing.lg,
+    marginBottom: spacing.sm,
+    backgroundColor: colors.bgElevated,
+    borderRadius: radius.md,
+    padding: spacing.md,
+    ...shadow,
+  },
+  sectionTitle: { color: colors.text, fontSize: 15, fontWeight: '700', marginBottom: 8 },
   overview: { color: colors.textDim, fontSize: 14, lineHeight: 21 },
 })

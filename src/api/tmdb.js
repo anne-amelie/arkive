@@ -48,7 +48,11 @@ export async function getSeriesExtended(id) {
     name: json.name,
     overview: json.overview,
     image: json.poster_path,
+    backdrop: json.backdrop_path,
     seasons: json.seasons || [],
+    genres: (json.genres || []).map((g) => g.name),
+    rating: json.vote_average || null,
+    year: yearOf(json.first_air_date),
   }
 }
 
@@ -59,8 +63,16 @@ export async function getMovieExtended(id) {
     name: json.title,
     overview: json.overview,
     image: json.poster_path,
+    backdrop: json.backdrop_path,
     runtime: json.runtime,
+    genres: (json.genres || []).map((g) => g.name),
+    rating: json.vote_average || null,
+    year: yearOf(json.release_date),
   }
+}
+
+function yearOf(dateString) {
+  return dateString ? dateString.slice(0, 4) : null
 }
 
 // Fetches every episode (across all seasons) to build the season/episode list.
@@ -79,6 +91,8 @@ export async function getAllSeriesEpisodes(id, seasons) {
       number: ep.episode_number,
       name: ep.name,
       image: ep.still_path,
+      airDate: ep.air_date,
+      runtime: ep.runtime,
     }))
   )
 }

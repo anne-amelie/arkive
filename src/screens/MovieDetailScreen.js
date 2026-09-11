@@ -6,12 +6,13 @@ import { getMovieExtended, artworkUrl, formatRuntime } from '../api/tmdb'
 import { useLibrary } from '../store/LibraryContext'
 import DetailHero from '../components/DetailHero'
 import AddToListSheet from '../components/AddToListSheet'
-import { colors, spacing } from '../theme'
+import { colors, spacing, radius, shadow, useAccentColors } from '../theme'
 
 export default function MovieDetailScreen({ route, navigation }) {
   const { id } = route.params
   const { library, addMovieToWatchlist, removeMovieFromWatchlist, toggleMovieWatched } =
     useLibrary()
+  const { accent } = useAccentColors()
   const [movie, setMovie] = useState(null)
   const [status, setStatus] = useState('loading')
   const [listSheetOpen, setListSheetOpen] = useState(false)
@@ -47,7 +48,7 @@ export default function MovieDetailScreen({ route, navigation }) {
         id,
         name: movie?.name || 'Movie',
         image: artworkUrl(movie?.image),
-        duration,
+        durationMinutes: movie?.runtime,
       })
     }
   }
@@ -63,8 +64,12 @@ export default function MovieDetailScreen({ route, navigation }) {
         {movie && (
           <>
             <DetailHero
-              image={movie.image ? artworkUrl(movie.image) : null}
+              backdrop={movie.backdrop ? artworkUrl(movie.backdrop, 'w780') : null}
+              poster={movie.image ? artworkUrl(movie.image) : null}
               title={movie.name}
+              year={movie.year}
+              rating={movie.rating}
+              genres={movie.genres}
               subtitle={duration}
               progress={inLibrary ? (watched ? 1 : 0) : null}
               inLibrary={inLibrary}
@@ -73,23 +78,23 @@ export default function MovieDetailScreen({ route, navigation }) {
               onAddToList={() => setListSheetOpen(true)}
             />
 
-            <View style={{ padding: spacing.md }}>
-              {movie.overview && (
-                <>
-                  <Text style={styles.sectionTitle}>Synopsis</Text>
-                  <Text style={styles.overview}>{movie.overview}</Text>
-                </>
-              )}
-
+            <View style={{ paddingHorizontal: spacing.md }}>
               {inLibrary && (
                 <Pressable style={styles.watchedRow} onPress={() => toggleMovieWatched(id)}>
                   <Text style={styles.watchedLabel}>Mark as watched</Text>
                   <Ionicons
                     name={watched ? 'checkmark-circle' : 'checkmark-circle-outline'}
                     size={22}
-                    color={watched ? colors.accent : colors.textDim}
+                    color={watched ? accent : colors.textDim}
                   />
                 </Pressable>
+              )}
+
+              {movie.overview && (
+                <View style={styles.synopsisCard}>
+                  <Text style={styles.sectionTitle}>Synopsis</Text>
+                  <Text style={styles.overview}>{movie.overview}</Text>
+                </View>
               )}
             </View>
 
@@ -109,17 +114,25 @@ export default function MovieDetailScreen({ route, navigation }) {
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.bg },
   emptyMsg: { color: colors.textDim, textAlign: 'center', padding: 40, fontSize: 14 },
-  sectionTitle: { color: colors.text, fontSize: 15, fontWeight: '600', marginBottom: 8 },
+  synopsisCard: {
+    marginTop: spacing.md,
+    backgroundColor: colors.bgElevated,
+    borderRadius: radius.md,
+    padding: spacing.md,
+    ...shadow,
+  },
+  sectionTitle: { color: colors.text, fontSize: 15, fontWeight: '700', marginBottom: 8 },
   overview: { color: colors.textDim, fontSize: 14, lineHeight: 21 },
   watchedRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: colors.card,
-    borderRadius: 10,
+    backgroundColor: colors.bgElevated,
+    borderRadius: radius.md,
     paddingVertical: 14,
     paddingHorizontal: spacing.md,
     marginTop: spacing.lg,
+    ...shadow,
   },
   watchedLabel: { color: colors.text, fontSize: 15, fontWeight: '600' },
 })
