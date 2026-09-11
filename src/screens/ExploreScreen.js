@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { View, Text, TextInput, ScrollView, Pressable, StyleSheet } from 'react-native'
+import { View, Text, TextInput, Pressable, StyleSheet } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { Ionicons } from '@expo/vector-icons'
 import { searchSeries, searchMovies, artworkUrl } from '../api/tmdb'
@@ -85,20 +85,13 @@ export default function ExploreScreen({ navigation }) {
         <Text style={styles.emptyMsg}>No results for "{query}".</Text>
       )}
 
-      <ScrollView contentContainerStyle={{ paddingBottom: tabBarClearance }}>
-        <CardGrid
-          items={results}
-          style={{ paddingTop: spacing.sm }}
-          renderItem={(item) => (
-            <ShowCard
-              key={item.id}
-              show={item}
-              showProgress={false}
-              onPress={() => goToItem(item)}
-            />
-          )}
-        />
-      </ScrollView>
+      <CardGrid
+        items={results}
+        style={{ paddingTop: spacing.sm, paddingBottom: tabBarClearance }}
+        renderItem={(item) => (
+          <ShowCard key={item.id} show={item} showProgress={false} onPress={() => goToItem(item)} />
+        )}
+      />
     </SafeAreaView>
   )
 }

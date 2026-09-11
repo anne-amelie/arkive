@@ -3,14 +3,15 @@ import {
   Modal,
   View,
   Text,
-  Image,
   Animated,
+  ActivityIndicator,
   PanResponder,
   Pressable,
   useWindowDimensions,
   StyleSheet,
 } from 'react-native'
 import { colors, spacing, radius, shadow, useAccentColors } from '../theme'
+import { getCachedImageSize, bustImageSizeCache } from '../utils/imageSize'
 
 function clamp(value, min, max) {
   return Math.min(Math.max(value, min), max)
@@ -35,6 +36,8 @@ export default function ImageCropModal({
   const cropHeight = cropWidth / aspectRatio
 
   const [naturalSize, setNaturalSize] = useState(null)
+  const [loadFailed, setLoadFailed] = useState(false)
+  const [retryTick, setRetryTick] = useState(0)
   const translate = useRef(new Animated.ValueXY({ x: 0, y: 0 })).current
   const dragStart = useRef({ x: 0, y: 0 })
   const boundsRef = useRef({ freeX: 0, freeY: 0 })
@@ -44,12 +47,23 @@ export default function ImageCropModal({
     if (!visible || !uri) return
     initializedFor.current = null
     setNaturalSize(null)
-    Image.getSize(
-      uri,
-      (width, height) => setNaturalSize({ width, height }),
-      () => setNaturalSize(null)
-    )
-  }, [visible, uri])
+    setLoadFailed(false)
+    let cancelled = false
+    getCachedImageSize(uri).then((size) => {
+      if (cancelled) return
+      if (size) setNaturalSize(size)
+      else setLoadFailed(true)
+    })
+    return () => {
+      cancelled = true
+    }
+  }, [visible, uri, retryTick])
+
+  function retryLoad() {
+    bustImageSizeCache(uri)
+    setLoadFailed(false)
+    setRetryTick((t) => t + 1)
+  }
 
   let displaySize = null
   if (naturalSize) {
@@ -120,7 +134,7 @@ export default function ImageCropModal({
           ]}
           {...panResponder.panHandlers}
         >
-          {naturalSize && displaySize && (
+          {naturalSize && displaySize ? (
             <Animated.Image
               source={{ uri }}
               style={{
@@ -129,6 +143,15 @@ export default function ImageCropModal({
                 transform: translate.getTranslateTransform(),
               }}
             />
+          ) : loadFailed ? (
+            <View style={styles.loadError}>
+              <Text style={styles.loadErrorText}>Couldn't load this image</Text>
+              <Pressable onPress={retryLoad}>
+                <Text style={[styles.retryText, { color: accent }]}>Retry</Text>
+              </Pressable>
+            </View>
+          ) : (
+            <ActivityIndicator color={accent} />
           )}
         </View>
 
@@ -161,7 +184,12 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     borderWidth: 2,
     backgroundColor: colors.card,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
+  loadError: { alignItems: 'center', gap: spacing.sm, padding: spacing.md },
+  loadErrorText: { color: colors.textDim, fontSize: 13, textAlign: 'center' },
+  retryText: { fontSize: 14, fontWeight: '700' },
   actions: {
     flexDirection: 'row',
     gap: spacing.sm,

@@ -1,4 +1,5 @@
-import { View, Image, Pressable, StyleSheet } from 'react-native'
+import { View, Pressable, StyleSheet } from 'react-native'
+import { Image } from 'expo-image'
 import { Ionicons } from '@expo/vector-icons'
 import { colors, useAccentColors } from '../theme'
 
@@ -9,7 +10,14 @@ export default function ShowCard({ show, onPress, showProgress = true }) {
   return (
     <Pressable style={styles.card} onPress={onPress}>
       {show.image ? (
-        <Image source={{ uri: show.image }} style={styles.image} resizeMode="cover" />
+        <Image
+          source={{ uri: show.image }}
+          style={styles.image}
+          contentFit="cover"
+          transition={150}
+          cachePolicy="memory-disk"
+          recyclingKey={String(show.id)}
+        />
       ) : (
         <View style={styles.emptyAdd}>
           <Ionicons name="add" size={26} color={colors.textDim} />

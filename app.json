@@ -28,7 +28,8 @@
         {
           "backgroundColor": "#0e0e10"
         }
-      ]
+      ],
+      "expo-image"
     ]
   }
 }
