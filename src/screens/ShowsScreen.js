@@ -3,12 +3,14 @@ import { Text, ScrollView, StyleSheet } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { useLibrary } from '../store/LibraryContext'
 import Shelf from '../components/Shelf'
+import ShowCard from '../components/ShowCard'
+import CardGrid from '../components/CardGrid'
 import SegmentedTabs from '../components/SegmentedTabs'
 import { colors, spacing, tabBarClearance } from '../theme'
 
 const TAB_OPTIONS = [
   { key: 'watchlist', label: 'Watch List' },
-  { key: 'upcoming', label: 'Upcoming' },
+  { key: 'watched', label: 'Watched' },
 ]
 
 const STALE_DAYS = 21
@@ -25,14 +27,17 @@ export default function ShowsScreen({ navigation }) {
 
   const shows = Object.values(library.shows)
 
-  const { watchNext, staleWatch, notStarted } = useMemo(() => {
+  const { watchNext, staleWatch, notStarted, completed } = useMemo(() => {
     const now = Date.now()
     const watchNext = []
     const staleWatch = []
     const notStarted = []
+    const completed = []
     for (const show of shows) {
       const withProg = withProgress(show)
-      if (withProg.watchedCount === 0) {
+      if (show.totalEpisodes && withProg.watchedCount === show.totalEpisodes) {
+        completed.push(withProg)
+      } else if (withProg.watchedCount === 0) {
         notStarted.push(withProg)
       } else if (show.lastWatchedAt && now - show.lastWatchedAt > STALE_DAYS * 86400000) {
         staleWatch.push(withProg)
@@ -40,7 +45,7 @@ export default function ShowsScreen({ navigation }) {
         watchNext.push(withProg)
       }
     }
-    return { watchNext, staleWatch, notStarted }
+    return { watchNext, staleWatch, notStarted, completed }
   }, [shows])
 
   const goToShow = (show) => navigation.navigate('ShowDetail', { id: show.id })
@@ -69,10 +74,16 @@ export default function ShowsScreen({ navigation }) {
               <Shelf title="Haven't started" shows={notStarted} onSelect={goToShow} />
             </>
           )
+        ) : completed.length === 0 ? (
+          <Text style={styles.emptyMsg}>Nothing here yet.</Text>
         ) : (
-          <Text style={styles.emptyMsg}>
-            Upcoming episodes will show up here once we're connected to TMDb's air dates.
-          </Text>
+          <CardGrid
+            items={completed}
+            style={{ paddingTop: spacing.md }}
+            renderItem={(show) => (
+              <ShowCard key={show.id} show={show} onPress={() => goToShow(show)} />
+            )}
+          />
         )}
       </ScrollView>
     </SafeAreaView>
