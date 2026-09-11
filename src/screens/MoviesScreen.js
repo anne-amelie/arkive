@@ -16,16 +16,16 @@ export default function MoviesScreen({ navigation }) {
   const { library } = useLibrary()
   const [tab, setTab] = useState('toWatch')
 
-  const movies = Object.values(library.movies)
+  const movieCount = Object.keys(library.movies).length
 
   const { toWatch, watched } = useMemo(() => {
     const toWatch = []
     const watched = []
-    for (const movie of movies) {
+    for (const movie of Object.values(library.movies)) {
       ;(movie.watched ? watched : toWatch).push({ ...movie, progress: movie.watched ? 1 : 0 })
     }
     return { toWatch, watched }
-  }, [movies])
+  }, [library.movies])
 
   const shown = tab === 'toWatch' ? toWatch : watched
   const goToMovie = (movie) => navigation.navigate('MovieDetail', { id: movie.id })
@@ -41,7 +41,7 @@ export default function MoviesScreen({ navigation }) {
         style={{ marginBottom: spacing.md }}
       />
 
-      {movies.length === 0 ? (
+      {movieCount === 0 ? (
         <Text style={styles.emptyMsg}>
           Your movie list is empty. Go to "Explore" (Movies tab) to add some.
         </Text>

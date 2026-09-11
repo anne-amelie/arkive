@@ -38,7 +38,7 @@ export default function ProfileScreen({ navigation }) {
       moviesWatched,
       watchTime: formatRuntime(episodeMinutes + movieMinutes) || '0min',
     }
-  }, [library])
+  }, [library.shows, library.movies])
 
   return (
     <SafeAreaView style={styles.safe} edges={['top']}>

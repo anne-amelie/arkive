@@ -134,7 +134,7 @@ export default function ImageCropModal({
           ]}
           {...panResponder.panHandlers}
         >
-          {naturalSize && displaySize ? (
+          {naturalSize && displaySize && (
             <Animated.Image
               source={{ uri }}
               style={{
@@ -143,15 +143,20 @@ export default function ImageCropModal({
                 transform: translate.getTranslateTransform(),
               }}
             />
-          ) : loadFailed ? (
-            <View style={styles.loadError}>
-              <Text style={styles.loadErrorText}>Couldn't load this image</Text>
-              <Pressable onPress={retryLoad}>
-                <Text style={[styles.retryText, { color: accent }]}>Retry</Text>
-              </Pressable>
+          )}
+          {!(naturalSize && displaySize) && (
+            <View style={styles.centerOverlay}>
+              {loadFailed ? (
+                <View style={styles.loadError}>
+                  <Text style={styles.loadErrorText}>Couldn't load this image</Text>
+                  <Pressable onPress={retryLoad}>
+                    <Text style={[styles.retryText, { color: accent }]}>Retry</Text>
+                  </Pressable>
+                </View>
+              ) : (
+                <ActivityIndicator color={accent} />
+              )}
             </View>
-          ) : (
-            <ActivityIndicator color={accent} />
           )}
         </View>
 
@@ -184,6 +189,10 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     borderWidth: 2,
     backgroundColor: colors.card,
+  },
+
+  centerOverlay: {
+    ...StyleSheet.absoluteFill,
     alignItems: 'center',
     justifyContent: 'center',
   },
