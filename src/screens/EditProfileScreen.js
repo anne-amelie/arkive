@@ -1,5 +1,13 @@
 import { useState } from 'react'
-import { View, Text, TextInput, Pressable, ScrollView, StyleSheet } from 'react-native'
+import {
+  View,
+  Text,
+  TextInput,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  useWindowDimensions,
+} from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { LinearGradient } from 'expo-linear-gradient'
 import { Ionicons } from '@expo/vector-icons'
@@ -8,15 +16,17 @@ import PosterPickerSheet from '../components/PosterPickerSheet'
 import FocalImage from '../components/FocalImage'
 import { colors, spacing, radius, shadow, useAccentColors } from '../theme'
 
-const BACKGROUND_ASPECT_RATIO = 2.3
+const BANNER_HEIGHT = 170
 
 export default function EditProfileScreen({ navigation }) {
   const { library, updateProfile } = useLibrary()
   const { accent } = useAccentColors()
+  const { width: windowWidth } = useWindowDimensions()
   const [username, setUsername] = useState(library.profile?.username || '')
   const [pickerTarget, setPickerTarget] = useState(null) // 'avatar' | 'background' | null
   const backgroundImage = library.profile?.backgroundImage
   const avatarImage = library.profile?.avatarImage
+  const backgroundAspectRatio = windowWidth / BANNER_HEIGHT
 
   function handleDone() {
     updateProfile({ username: username.trim() })
@@ -103,7 +113,7 @@ export default function EditProfileScreen({ navigation }) {
       <PosterPickerSheet
         visible={pickerTarget === 'background'}
         title="Choose a background"
-        aspectRatio={BACKGROUND_ASPECT_RATIO}
+        aspectRatio={backgroundAspectRatio}
         onClose={() => setPickerTarget(null)}
         onSelect={(image) => updateProfile({ backgroundImage: image })}
       />
@@ -114,7 +124,7 @@ export default function EditProfileScreen({ navigation }) {
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.bg },
   content: { paddingBottom: spacing.xl },
-  banner: { height: 170 },
+  banner: { height: BANNER_HEIGHT },
   bannerImage: { width: '100%', height: '100%' },
   topScrim: {
     position: 'absolute',

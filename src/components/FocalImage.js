@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react'
-import { View, StyleSheet } from 'react-native'
-import { Image } from 'expo-image'
+import { View, Image, StyleSheet } from 'react-native'
 import { getCachedImageSize } from '../utils/imageSize'
 
 // Renders `uri` cropped to fill its box using the chosen focal point
@@ -42,9 +41,7 @@ export default function FocalImage({ uri, focalX = 0.5, focalY = 0.5, style }) {
 
   return (
     <View style={[styles.box, style]} onLayout={handleLayout}>
-      {uri && imageStyle && (
-        <Image source={{ uri }} style={imageStyle} cachePolicy="memory-disk" />
-      )}
+      {uri && imageStyle && <Image source={{ uri }} style={imageStyle} />}
     </View>
   )
 }

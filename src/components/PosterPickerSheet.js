@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import {
   Modal,
   View,
@@ -106,14 +106,17 @@ export default function PosterPickerSheet({ visible, onClose, title, onSelect, a
     return () => clearTimeout(debounceRef.current)
   }, [query, mediaType])
 
-  const watched = [
-    ...Object.values(library.shows)
-      .filter((show) => Object.keys(show.watchedEpisodes || {}).length > 0)
-      .map((show) => ({ id: `show-${show.id}`, image: show.image })),
-    ...Object.values(library.movies)
-      .filter((movie) => movie.watched)
-      .map((movie) => ({ id: `movie-${movie.id}`, image: movie.image })),
-  ]
+  const watched = useMemo(
+    () => [
+      ...Object.values(library.shows)
+        .filter((show) => Object.keys(show.watchedEpisodes || {}).length > 0)
+        .map((show) => ({ id: `show-${show.id}`, image: show.image })),
+      ...Object.values(library.movies)
+        .filter((movie) => movie.watched)
+        .map((movie) => ({ id: `movie-${movie.id}`, image: movie.image })),
+    ],
+    [library.shows, library.movies]
+  )
 
   const isSearching = query.trim().length > 0
   const items = isSearching ? results : watched
@@ -126,7 +129,7 @@ export default function PosterPickerSheet({ visible, onClose, title, onSelect, a
   function handleCropConfirm(focalX, focalY) {
     onSelect({ uri: croppingUri, focalX, focalY })
     setCroppingUri(null)
-    onClose()
+    setTimeout(onClose, 300)
   }
 
   return (

@@ -25,7 +25,7 @@ export default function ShowsScreen({ navigation }) {
   const { library } = useLibrary()
   const [tab, setTab] = useState('watchlist')
 
-  const shows = Object.values(library.shows)
+  const showCount = Object.keys(library.shows).length
 
   const { watchNext, staleWatch, notStarted, completed } = useMemo(() => {
     const now = Date.now()
@@ -33,7 +33,7 @@ export default function ShowsScreen({ navigation }) {
     const staleWatch = []
     const notStarted = []
     const completed = []
-    for (const show of shows) {
+    for (const show of Object.values(library.shows)) {
       const withProg = withProgress(show)
       if (show.totalEpisodes && withProg.watchedCount === show.totalEpisodes) {
         completed.push(withProg)
@@ -46,7 +46,7 @@ export default function ShowsScreen({ navigation }) {
       }
     }
     return { watchNext, staleWatch, notStarted, completed }
-  }, [shows])
+  }, [library.shows])
 
   const goToShow = (show) => navigation.navigate('ShowDetail', { id: show.id })
 
@@ -63,7 +63,7 @@ export default function ShowsScreen({ navigation }) {
 
       {tab === 'watchlist' ? (
         <ScrollView contentContainerStyle={{ paddingBottom: tabBarClearance }}>
-          {shows.length === 0 ? (
+          {showCount === 0 ? (
             <Text style={styles.emptyMsg}>
               Your watchlist is empty. Go to "Explore" to add some shows.
             </Text>
