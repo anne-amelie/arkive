@@ -6,9 +6,6 @@
     "orientation": "portrait",
     "userInterfaceStyle": "dark",
     "backgroundColor": "#0e0e10",
-    "splash": {
-      "backgroundColor": "#0e0e10"
-    },
     "assetBundlePatterns": [
       "**/*"
     ],
@@ -23,7 +20,15 @@
       }
     },
     "plugins": [
-      "expo-font"
+      "expo-font",
+      "expo-sharing",
+      "expo-status-bar",
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#0e0e10"
+        }
+      ]
     ]
   }
 }

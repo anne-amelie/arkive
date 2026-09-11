@@ -14,6 +14,7 @@ import ShowDetailScreen from '../screens/ShowDetailScreen'
 import MovieDetailScreen from '../screens/MovieDetailScreen'
 import EditProfileScreen from '../screens/EditProfileScreen'
 import SettingsScreen from '../screens/SettingsScreen'
+import ImportTvTimeScreen from '../screens/ImportTvTimeScreen'
 import { colors, spacing, radius, useAccentColors } from '../theme'
 
 const Tab = createBottomTabNavigator()
@@ -107,6 +108,11 @@ export default function RootNavigator() {
       <Stack.Screen
         name="Settings"
         component={SettingsScreen}
+        options={{ presentation: 'card' }}
+      />
+      <Stack.Screen
+        name="ImportTvTime"
+        component={ImportTvTimeScreen}
         options={{ presentation: 'card' }}
       />
     </Stack.Navigator>
