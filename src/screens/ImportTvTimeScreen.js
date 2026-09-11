@@ -3,7 +3,6 @@ import { View, Text, Pressable, ScrollView, ActivityIndicator, StyleSheet } from
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { Ionicons } from '@expo/vector-icons'
 import * as DocumentPicker from 'expo-document-picker'
-import * as FileSystem from 'expo-file-system'
 import { useLibrary } from '../store/LibraryContext'
 import { parseTvTimeFile, importMovies, importSeries } from '../utils/tvTimeImport'
 import { colors, spacing, radius, shadow, useAccentColors } from '../theme'
@@ -32,7 +31,7 @@ export default function ImportTvTimeScreen({ navigation }) {
     try {
       const files = await Promise.all(
         result.assets.map(async (asset) => {
-          const content = await FileSystem.readAsStringAsync(asset.uri)
+          const content = await (await fetch(asset.uri)).text()
           return JSON.parse(content)
         })
       )
@@ -67,7 +66,7 @@ export default function ImportTvTimeScreen({ navigation }) {
       setStatus('done')
     } catch (e) {
       console.error(e)
-      setError('Import failed. Make sure the files are valid TV Time exports.')
+      setError(`Import failed: ${e?.message ?? e}`)
       setStatus('error')
     }
   }

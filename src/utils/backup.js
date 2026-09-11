@@ -2,7 +2,7 @@
 // AsyncStorage) so the user has something they can grab and store elsewhere —
 // there's no backend, so this file is the only way to back up or move data
 // between installs.
-import * as FileSystem from 'expo-file-system'
+import * as FileSystem from 'expo-file-system/legacy'
 import * as Sharing from 'expo-sharing'
 
 export const BACKUP_FILE_URI = `${FileSystem.documentDirectory}arkive-backup.json`
